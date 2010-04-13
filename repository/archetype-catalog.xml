@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-catalog>
+  <archetypes>
+    <groupId>org.slim3</groupId>
+    <artifactId>slim3-archetype-quickstart</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+    <repository>http://slim3.googlecode.com/svn/branches/issue16/repository/</repository>
+    <description>Cubby 2.0.9 S2Container Integration</description>
+  </archetypes>
+</archetype-catalog>
