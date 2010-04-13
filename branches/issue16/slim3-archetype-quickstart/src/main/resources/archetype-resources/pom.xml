@@ -210,6 +210,8 @@
             <exclude>org.slim3:slim3-gen</exclude>
             <exclude>com.google.appengine:appengine-api-1.0-sdk</exclude>
             <exclude>com.google.appengine:appengine-api-labs</exclude>
+            <exclude>com.google.appengine:appengine-api-stubs</exclude>
+            <exclude>com.google.appengine:appengine-local-runtime</exclude>
           </excludes>
           <additionalProjectnatures>
             <projectnature>com.google.appengine.eclipse.core.gaeNature</projectnature>
@@ -243,6 +245,26 @@ eclipse.preferences.version=1
 org.eclipse.jdt.apt.aptEnabled=true
 org.eclipse.jdt.apt.genSrcDir=${dollar}${lcurly}generated.src}
 org.eclipse.jdt.apt.reconcileEnabled=false
+               ]]>
+              </content>
+            </file>
+            <file>
+              <name>.settings/com.google.gdt.eclipse.core.prefs</name>
+              <content>
+                <![CDATA[
+eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=
+warSrcDir=war
+warSrcDirIsOutput=false
+               ]]>
+              </content>
+            </file>
+            <file>
+              <name>.settings/com.google.appengine.eclipse.core.prefs</name>
+              <content>
+                <![CDATA[
+eclipse.preferences.version=1
+ormEnhancementInclusions=
                ]]>
               </content>
             </file>
