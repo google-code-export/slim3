@@ -192,7 +192,7 @@ public class Default implements JsonCoder{
     }
 
     @Override
-    public void encode(JsonWriter writer, ModelRef<?> value, int maxDepth, int currentDepth) {
+    public void encode(JsonWriter writer, ModelRef<?> value, JsonOptions options, int currentDepth) {
         Key key = value.getKey();
         if(key != null){
             writer.writeString(Datastore.keyToString(key));

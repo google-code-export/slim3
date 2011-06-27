@@ -29,6 +29,7 @@ import org.slim3.datastore.StringAttributeMeta;
 import org.slim3.datastore.StringCollectionAttributeMeta;
 import org.slim3.datastore.StringUnindexedAttributeMeta;
 import org.slim3.datastore.UnindexedAttributeMeta;
+import org.slim3.datastore.json.JsonOptions;
 import org.slim3.datastore.json.JsonRootReader;
 import org.slim3.datastore.json.JsonWriter;
 import org.slim3.datastore.model.Hoge;
@@ -608,7 +609,7 @@ public class HogeMeta extends ModelMeta<Hoge> {
     }
 
     @Override
-    protected void modelToJson(JsonWriter writer, Object model, int maxDepth, int currentDepth) {
+    protected void modelToJson(JsonWriter writer, Object model, JsonOptions options, int currentDepth) {
     }
 
     @Override

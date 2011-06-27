@@ -1,5 +1,7 @@
 package com.google.appengine.api.datastore.server.meta;
 
+import org.slim3.datastore.json.JsonOptions;
+
 import com.google.appengine.api.datastore.shared.model.Bean;
 
 //@javax.annotation.Generated(value = { "slim3-gen", "@VERSION@" }, date = "2010-12-23 22:34:54")
@@ -124,7 +126,7 @@ public final class BeanMeta extends org.slim3.datastore.ModelMeta<Bean> {
     }
 
     @Override
-    protected void modelToJson(org.slim3.datastore.json.JsonWriter writer, java.lang.Object model, int maxDepth, int currentDepth) {
+    protected void modelToJson(org.slim3.datastore.json.JsonWriter writer, java.lang.Object model, JsonOptions options, int currentDepth) {
         Bean m = (Bean) model;
         writer.beginObject();
         org.slim3.datastore.json.JsonCoder encoder = null;

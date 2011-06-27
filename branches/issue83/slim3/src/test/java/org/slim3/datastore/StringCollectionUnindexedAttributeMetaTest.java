@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.junit.Test;
+import org.slim3.datastore.json.JsonOptions;
 import org.slim3.datastore.json.JsonRootReader;
 import org.slim3.datastore.json.JsonWriter;
 import org.slim3.datastore.model.Hoge;
@@ -85,7 +86,7 @@ public class StringCollectionUnindexedAttributeMetaTest {
         }
 
         @Override
-        protected void modelToJson(JsonWriter writer, Object model, int maxDepth, int currentDepth) {
+        protected void modelToJson(JsonWriter writer, Object model, JsonOptions options, int currentDepth) {
         }
 
         @Override

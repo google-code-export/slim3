@@ -27,8 +27,8 @@ public interface ModelWriter {
      * Write the model.
      * @param writer the writer
      * @param model the model
-     * @param maxDepth the max depth
+     * @param options the JsonOptions
      * @param currentDepth the current depth
      */
-    void write(JsonWriter writer, Object model, int maxDepth, int currentDepth);
+    void write(JsonWriter writer, Object model, JsonOptions options, int currentDepth);
 }

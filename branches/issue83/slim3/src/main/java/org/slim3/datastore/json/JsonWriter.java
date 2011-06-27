@@ -158,11 +158,11 @@ public class JsonWriter {
     /**
      * Writes a model.
      * @param model the model
-     * @param maxDepth the max depth
+     * @param options the max depth
      * @param currentDepth the current depth
      */
-    public void writeModel(Object model, int maxDepth, int currentDepth){
-        modelWriter.write(this, model, maxDepth, currentDepth);
+    public void writeModel(Object model, JsonOptions options, int currentDepth){
+        modelWriter.write(this, model, options, currentDepth);
     }
 
     private void writeCammaForValue(){
