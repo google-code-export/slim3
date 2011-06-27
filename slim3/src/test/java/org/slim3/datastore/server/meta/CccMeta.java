@@ -15,6 +15,7 @@
  */
 package org.slim3.datastore.server.meta;
 
+import org.slim3.datastore.json.JsonOptions;
 import org.slim3.datastore.json.JsonRootReader;
 import org.slim3.datastore.json.JsonWriter;
 
@@ -144,7 +145,7 @@ public final class CccMeta extends
     }
 
     @Override
-    protected void modelToJson(JsonWriter writer, Object model, int maxDepth, int currentDepth) {
+    protected void modelToJson(JsonWriter writer, Object model, JsonOptions options, int currentDepth) {
     }
 
     @Override

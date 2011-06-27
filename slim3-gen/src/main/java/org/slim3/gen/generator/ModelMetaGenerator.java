@@ -2112,9 +2112,10 @@ public class ModelMetaGenerator implements Generator {
             printer.println("@Override");
             printer
                 .println(
-                    "protected void modelToJson(%s writer, %s model, int maxDepth, int currentDepth) {",
+                    "protected void modelToJson(%s writer, %s model, %s options, int currentDepth) {",
                     JsonWriter,
-                    Object);
+                    Object,
+                    "org.slim3.datastore.json.JsonOptions");
             printer.indent();
             if (modelMetaDesc.isAbstrct()) {
                 printer.println(
@@ -2192,7 +2193,18 @@ public class ModelMetaGenerator implements Generator {
         @Override
         protected Void defaultAction(DataType type, AttributeMetaDesc p)
                 throws RuntimeException {
+            printer.println("org.slim3.datastore.json.JsonCoder %s%s = options.coder(\"%2$s\");",
+                coderExp, p.getAttributeName());
+            printer.println("if(%s%s != null){", coderExp, p.getAttributeName());
+            printer.indent();
+            printer.println("%s%s.encode(writer, %s);",
+                coderExp, p.getAttributeName(), valueExp);
+            printer.unindent();
+            printer.println("} else{");
+            printer.indent();
             printer.println("%s.encode(writer, %s);", coderExp, valueExp);
+            printer.unindent();
+            printer.println("}");
             return null;
         }
 
@@ -2204,7 +2216,18 @@ public class ModelMetaGenerator implements Generator {
                     "if(%s == null || %1$s.getBytes() == null){",
                     valueExp);
                 printer.indent();
+                printer.println("org.slim3.datastore.json.JsonCoder %s%s = options.coder(\"%2$s\");",
+                    coderExp, p.getAttributeName());
+                printer.println("if(%s%s != null){", coderExp, p.getAttributeName());
+                printer.indent();
+                printer.println("%s%s.encode(writer, (%s)null);",
+                    coderExp, p.getAttributeName(), Blob);
+                printer.unindent();
+                printer.println("} else{");
+                printer.indent();
                 printer.println("%s.encode(writer, (%s)null);", coderExp, Blob);
+                printer.unindent();
+                printer.println("}");
                 printer.unindent();
                 printer.println("} else{");
                 printer.indent();
@@ -2362,7 +2385,7 @@ public class ModelMetaGenerator implements Generator {
         public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
                 throws RuntimeException {
             printer.println(
-                "%s.encode(writer, %s, maxDepth, currentDepth);",
+                "%s.encode(writer, %s, options, currentDepth);",
                 coderExp,
                 valueExp);
             return null;
@@ -2579,7 +2602,7 @@ public class ModelMetaGenerator implements Generator {
             if (type instanceof SortedSetType) {
                 container = TreeSet;
             } else if (type instanceof SetType) {
-                container = HashSet;
+                container = LinkedHashSet;
             } else if (type instanceof LinkedListType) {
                 container = LinkedList;
             }

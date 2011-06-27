@@ -207,10 +207,10 @@ public interface JsonCoder{
      * Encode value to JSON.
      * @param writer the writer
      * @param value the value
-     * @param maxDepth the max depth
+     * @param options the JsonOptions
      * @param currentDepth the current depth
      */
-    void encode(JsonWriter writer, ModelRef<?> value, int maxDepth, int currentDepth);
+    void encode(JsonWriter writer, ModelRef<?> value, JsonOptions options, int currentDepth);
 
     /**
      * Encode value to JSON.

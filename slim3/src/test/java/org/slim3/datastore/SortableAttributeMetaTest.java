@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.slim3.datastore.json.JsonOptions;
 import org.slim3.datastore.json.JsonRootReader;
 import org.slim3.datastore.json.JsonWriter;
 import org.slim3.datastore.model.Hoge;
@@ -84,7 +85,7 @@ public class SortableAttributeMetaTest extends AppEngineTestCase {
         }
 
         @Override
-        protected void modelToJson(JsonWriter writer, Object model, int maxDepth, int currentDepth) {
+        protected void modelToJson(JsonWriter writer, Object model, JsonOptions options, int currentDepth) {
         }
 
         @Override

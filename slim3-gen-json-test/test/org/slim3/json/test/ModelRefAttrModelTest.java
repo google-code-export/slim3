@@ -93,6 +93,27 @@ public class ModelRefAttrModelTest {
     }
 
     @Test
+    public void modelToJson_invRef() throws Exception {
+        String json = meta.modelToJson(getModel(), 1);
+        System.out.println(json);
+        JSON.decode(json);
+
+        assertEquals(
+            "{\"expandedRef\":{"
+                + "\"expandedRef\":\"aglzbGltMy1nZW5yLAsSEU1vZGVsUmVmQXR0ck1vZGVsIhVleHBhbmRlZCBncm91bmQgY2hpbGQM\","
+                + "\"expandedRefList\":[],"
+                + "\"key\":\"aglzbGltMy1nZW5yJQsSEU1vZGVsUmVmQXR0ck1vZGVsIg5leHBhbmRlZCBjaGlsZAw\","
+                + "\"name\":\"expanded child\","
+                + "\"refList\":[]},"
+                + "\"expandedRefList\":[],"
+                + "\"key\":\"aglzbGltMy1nZW5yHQsSEU1vZGVsUmVmQXR0ck1vZGVsIgZwYXJlbnQM\","
+                + "\"name\":\"parent\","
+                + "\"ref\":\"aglzbGltMy1nZW5yKgsSEU1vZGVsUmVmQXR0ck1vZGVsIhNjaGlsZChub3QgZXhwYW5kZWQpDA\","
+                + "\"refList\":[]}",
+            json);
+    }
+
+    @Test
     public void modelToJson_null() {
         String json = meta.modelToJson(new ModelRefAttrModel());
         assertEquals("{\"expandedRefList\":[],\"refList\":[]}", json);

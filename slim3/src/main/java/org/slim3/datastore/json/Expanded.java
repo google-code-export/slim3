@@ -29,14 +29,14 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class Expanded extends Default{
     @Override
-    public void encode(JsonWriter writer, ModelRef<?> value, int maxDepth, int currentDepth) {
-        if(currentDepth == maxDepth){
-            super.encode(writer, value, maxDepth, currentDepth);
+    public void encode(JsonWriter writer, ModelRef<?> value, JsonOptions options, int currentDepth) {
+        if(currentDepth == options.maxDepth()){
+            super.encode(writer, value, options, currentDepth);
             return;
         }
         Object model = value.getModel();
         if(model != null){
-            writer.writeModel(model, maxDepth, currentDepth);
+            writer.writeModel(model, options, currentDepth);
             return;
         }
         Key key = value.getKey();
