@@ -11,6 +11,6 @@
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.2.5.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/slim3"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/issue83-slim3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

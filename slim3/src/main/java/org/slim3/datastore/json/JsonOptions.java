@@ -17,8 +17,11 @@ package org.slim3.datastore.json;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slim3.datastore.AbstractAttributeMeta;
+
+import com.google.gwt.dev.util.collect.HashSet;
 
 /**
  * @author nakaguchi
@@ -42,6 +45,9 @@ public class JsonOptions {
     }
     
     public <M, A> JsonOptions excludes(AbstractAttributeMeta<M, A>... attrs){
+        for(AbstractAttributeMeta<?, ?> s : attrs){
+            excludes.add(s.getAttributeName());
+        }
         return this;
     }
 
@@ -56,16 +62,21 @@ public class JsonOptions {
     }
 
     public JsonOptions maxDepth(int maxDepth){
+        this.maxDepth = maxDepth;
         return this;
     }
     
     public boolean included(String attributeName){
-        return false;
+        if(defaultIncluded){
+            return !excludes.contains(attributeName);
+        }
+        return !excludes.contains(attributeName);
     }
-    
-    public String aliasOrAttributeName(String attributeName){
+
+    public String propertyName(String attributeName, String annotAlias){
         String alias = aliases.get(attributeName);
         if(alias != null) return alias;
+        if(annotAlias.length() > 0) return annotAlias;
         return attributeName;
     }
 
@@ -74,10 +85,12 @@ public class JsonOptions {
     }
     
     public int maxDepth(){
-        return -1;
+        return maxDepth;
     }
 
+    private int maxDepth;
     private boolean defaultIncluded = true;
+    private Set<String> excludes = new HashSet<String>();
     private Map<String, String> aliases = new HashMap<String, String>();
     private Map<String, JsonCoder> coders = new HashMap<String, JsonCoder>();
 }

@@ -2170,13 +2170,14 @@ public class ModelMetaGenerator implements Generator {
                         printer.indent();
                         indent++;
                     }
-                    String name = ja.getAlias();
-                    if (name.length() == 0) {
-                        name = attr.getAttributeName();
-                    }
+                    printer.println("if(options.included(\"%s\")){",
+                        attr.getAttributeName());
+                    printer.indent();
+                    indent++;
                     printer.println(
-                        "writer.setNextPropertyName(\"%1$s\");",
-                        name);
+                        "writer.setNextPropertyName(options.propertyName(" +
+                        "\"%s\", \"%s\"));",
+                        attr.getAttributeName(), ja.getAlias());
                     dataType.accept(this, attr);
                     for (int i = 0; i < indent; i++) {
                         printer.unindent();
