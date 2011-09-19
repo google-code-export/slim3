@@ -15,7 +15,54 @@
  */
 package org.slim3.gen.generator;
 
-import static org.slim3.gen.ClassConstants.*;
+import static org.slim3.gen.ClassConstants.ArrayList;
+import static org.slim3.gen.ClassConstants.AsyncDatastoreService;
+import static org.slim3.gen.ClassConstants.AttributeListener;
+import static org.slim3.gen.ClassConstants.Blob;
+import static org.slim3.gen.ClassConstants.BlobKey;
+import static org.slim3.gen.ClassConstants.Boolean;
+import static org.slim3.gen.ClassConstants.Category;
+import static org.slim3.gen.ClassConstants.CollectionAttributeMeta;
+import static org.slim3.gen.ClassConstants.CollectionUnindexedAttributeMeta;
+import static org.slim3.gen.ClassConstants.CoreAttributeMeta;
+import static org.slim3.gen.ClassConstants.CoreUnindexedAttributeMeta;
+import static org.slim3.gen.ClassConstants.Date;
+import static org.slim3.gen.ClassConstants.Double;
+import static org.slim3.gen.ClassConstants.Email;
+import static org.slim3.gen.ClassConstants.Entity;
+import static org.slim3.gen.ClassConstants.Float;
+import static org.slim3.gen.ClassConstants.GeoPt;
+import static org.slim3.gen.ClassConstants.HashSet;
+import static org.slim3.gen.ClassConstants.IMHandle;
+import static org.slim3.gen.ClassConstants.Integer;
+import static org.slim3.gen.ClassConstants.JsonArrayReader;
+import static org.slim3.gen.ClassConstants.JsonReader;
+import static org.slim3.gen.ClassConstants.JsonRootReader;
+import static org.slim3.gen.ClassConstants.JsonValueReader;
+import static org.slim3.gen.ClassConstants.JsonWriter;
+import static org.slim3.gen.ClassConstants.Key;
+import static org.slim3.gen.ClassConstants.Link;
+import static org.slim3.gen.ClassConstants.LinkedHashSet;
+import static org.slim3.gen.ClassConstants.LinkedList;
+import static org.slim3.gen.ClassConstants.Long;
+import static org.slim3.gen.ClassConstants.ModelListener;
+import static org.slim3.gen.ClassConstants.ModelRef;
+import static org.slim3.gen.ClassConstants.ModelRefAttributeMeta;
+import static org.slim3.gen.ClassConstants.Object;
+import static org.slim3.gen.ClassConstants.PhoneNumber;
+import static org.slim3.gen.ClassConstants.PostalAddress;
+import static org.slim3.gen.ClassConstants.Rating;
+import static org.slim3.gen.ClassConstants.Short;
+import static org.slim3.gen.ClassConstants.ShortBlob;
+import static org.slim3.gen.ClassConstants.String;
+import static org.slim3.gen.ClassConstants.StringAttributeMeta;
+import static org.slim3.gen.ClassConstants.StringCollectionAttributeMeta;
+import static org.slim3.gen.ClassConstants.StringCollectionUnindexedAttributeMeta;
+import static org.slim3.gen.ClassConstants.StringUnindexedAttributeMeta;
+import static org.slim3.gen.ClassConstants.Text;
+import static org.slim3.gen.ClassConstants.TreeSet;
+import static org.slim3.gen.ClassConstants.UnindexedAttributeMeta;
+import static org.slim3.gen.ClassConstants.User;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -29,10 +76,12 @@ import org.slim3.gen.ClassConstants;
 import org.slim3.gen.ProductInfo;
 import org.slim3.gen.datastore.ArrayType;
 import org.slim3.gen.datastore.BlobType;
+import org.slim3.gen.datastore.BooleanType;
 import org.slim3.gen.datastore.CollectionType;
 import org.slim3.gen.datastore.CorePrimitiveType;
 import org.slim3.gen.datastore.CoreReferenceType;
 import org.slim3.gen.datastore.DataType;
+import org.slim3.gen.datastore.DoubleType;
 import org.slim3.gen.datastore.EnumType;
 import org.slim3.gen.datastore.FloatType;
 import org.slim3.gen.datastore.IntegerType;
@@ -45,12 +94,14 @@ import org.slim3.gen.datastore.LongType;
 import org.slim3.gen.datastore.ModelRefType;
 import org.slim3.gen.datastore.PrimitiveBooleanType;
 import org.slim3.gen.datastore.PrimitiveByteType;
+import org.slim3.gen.datastore.PrimitiveCharType;
 import org.slim3.gen.datastore.PrimitiveDoubleType;
 import org.slim3.gen.datastore.PrimitiveFloatType;
 import org.slim3.gen.datastore.PrimitiveIntType;
 import org.slim3.gen.datastore.PrimitiveLongType;
 import org.slim3.gen.datastore.PrimitiveShortType;
 import org.slim3.gen.datastore.SetType;
+import org.slim3.gen.datastore.ShortBlobType;
 import org.slim3.gen.datastore.ShortType;
 import org.slim3.gen.datastore.SimpleDataTypeVisitor;
 import org.slim3.gen.datastore.SortedSetType;
@@ -151,6 +202,9 @@ public class ModelMetaGenerator implements Generator {
         printIsCipherProperty(printer);
         printModelToJsonMethod(printer);
         printJsonToModelMethod(printer);
+        printModelToPbMethod(printer);
+        printComputeModelSizePbMethod(printer);
+        printWritePbJsMethod(printer);
         printCustomExtensionMethods(printer);
         printer.unindent();
         printer.print("}");
@@ -622,6 +676,36 @@ public class ModelMetaGenerator implements Generator {
      */
     protected void printJsonToModelMethod(final Printer printer) {
         new JsonToModelMethodGenerator(printer).generate();
+    }
+
+    /**
+     * Generates the {@code modelToPb} method.
+     * 
+     * @param printer
+     *            the printer
+     */
+    protected void printModelToPbMethod(final Printer printer) {
+        new ModelToPbMethodGenerator(printer).generate();
+    }
+
+    /**
+     * Generates the {@code modelToPb} method.
+     * 
+     * @param printer
+     *            the printer
+     */
+    protected void printComputeModelSizePbMethod(final Printer printer) {
+        new ComputeModelSizePbMethodGenerator(printer).generate();
+    }
+
+    /**
+     * Generates the {@code writePbJs} method.
+     * 
+     * @param printer
+     *            the printer
+     */
+    protected void printWritePbJsMethod(final Printer printer) {
+        new WritePbJsMethodGenerator(printer).generate();
     }
 
     /**
@@ -2549,6 +2633,7 @@ public class ModelMetaGenerator implements Generator {
             }
             printer.unindent();
             printer.println("}");
+            printer.println("");
         }
 
         @Override
@@ -2765,6 +2850,580 @@ public class ModelMetaGenerator implements Generator {
                 return def;
             }
             return "(" + className + ")null";
+        }
+    }
+
+    protected static class PbTypeVisitor{
+        Void defaultAction(){return null;}
+        Void visitBooleanType(){return null;}
+        Void visitEnumType(){return null;}
+        Void visitInt32Type(){return null;}
+        Void visitInt64Type(){return null;}
+        Void visitStringType(){return null;}
+        Void visitFloatType(){return null;}
+        Void visitDoubleType(){return null;}
+        Void visitCollectionType(){return null;}
+        Void visitArrayType(){return null;}
+        Void visitBlobType(){return null;}
+        Void visitTextType(){return null;}
+        Void visitKeyType(){return null;}
+    }
+    protected class PbVisitorAdapter extends
+        SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException>{
+        /**
+         * 
+         */
+        public PbVisitorAdapter(PbTypeVisitor visitor) {
+            this.visitor = visitor;
+        }
+        private PbTypeVisitor visitor;
+        @Override
+        protected Void defaultAction(DataType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            return visitor.defaultAction();
+        }
+        @Override
+        public Void visitCollectionType(CollectionType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            return visitor.visitCollectionType();
+        }
+        @Override
+        public Void visitArrayType(ArrayType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            return visitor.visitArrayType();
+        }
+        @Override
+        public Void visitPrimitiveBooleanType(PrimitiveBooleanType type,
+                AttributeMetaDesc p) throws RuntimeException {
+            return visitor.visitBooleanType();
+        }
+        @Override
+        public Void visitBooleanType(BooleanType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            return visitor.visitBooleanType();
+        }
+    }
+
+    /**
+     * The method generator for modelToPb method.
+     * 
+     * @author Takao Nakaguchi
+     * 
+     * @since 1.0.6
+     */
+    protected class ModelToPbMethodGenerator extends
+            SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException> {
+        private final Printer printer;
+        private String valueExp;
+        private String coderExp;
+        private int indent;
+        private int fieldNum;
+
+        /**
+         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * 
+         * @param printer
+         *            the printer
+         */
+        public ModelToPbMethodGenerator(Printer printer) {
+            this.printer = printer;
+        }
+
+        /**
+         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * 
+         * @param printer
+         *            the printer
+         * @param valueExp
+         *            the value expression
+         * @param coderExp
+         *            the coder expression
+         * @param fieldNum
+         *            the field number
+         */
+        public ModelToPbMethodGenerator(Printer printer, String coderExp,
+                String valueExp, int fieldNum) {
+            this.printer = printer;
+            this.valueExp = valueExp;
+            this.coderExp = coderExp;
+            this.fieldNum = fieldNum;
+        }
+
+        /**
+         * Generates the modelToJson method.
+         */
+        public void generate() {
+            printer.println("@Override");
+            printer
+                .println(
+                    "protected void modelToPb(com.google.appengine.repackaged.com.google.protobuf" +
+                    ".CodedOutputStream cos, %s model, int maxDepth, int currentDepth)",
+                    Object);
+            printer.println("throws java.io.IOException{");
+            printer.indent();
+            if (modelMetaDesc.isAbstrct()) {
+                printer.println(
+                    "throw new %1$s(\"The class(%2$s) is abstract.\");",
+                    UnsupportedOperationException.class.getName(),
+                    modelMetaDesc.getModelClassName());
+            } else {
+                printer.println(
+                    "%s m = (%1$s) model;",
+                    modelMetaDesc.getModelClassName());
+                for (AttributeMetaDesc attr : modelMetaDesc
+                    .getAttributeMetaDescList()) {
+                    if (attr.getReadMethodName() == null)
+                        continue;
+                    fieldNum++;
+                    valueExp = "m." + attr.getReadMethodName() + "()";
+                    indent = 0;
+                    JsonAnnotation ja = attr.getJson();
+                    if(ja.isIgnore())
+                        continue;
+                    DataType dataType = attr.getDataType();
+                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+                        continue;
+                    }
+                    if (!(dataType instanceof CorePrimitiveType)) {
+                        printer.print("if(%s != null", valueExp);
+                        if (dataType instanceof TextType) {
+                            printer.printWithoutIndent(
+                                " && %s.getValue() != null",
+                                valueExp);
+                        } else if (dataType instanceof BlobType
+                                || dataType instanceof ShortBlobType) {
+                            printer.printWithoutIndent(
+                                " && %s.getBytes() != null",
+                                valueExp);
+                        } else if (dataType instanceof ModelRefType) {
+                            printer.printWithoutIndent(
+                                " && %s.getKey() != null",
+                                valueExp);
+                            valueExp = valueExp + ".getKey()";
+                       } else if (dataType instanceof InverseModelRefType) {
+                            printer.printWithoutIndent(
+                                " && getKey(m) != null"
+                                );
+                        }
+                        printer.printlnWithoutIndent("){");
+                        printer.indent();
+                        indent++;
+                    }
+                    String name = ja.getAlias();
+                    if (name.length() == 0) {
+                        name = attr.getAttributeName();
+                    }
+                    dataType.accept(this, attr);
+                    for (int i = 0; i < indent; i++) {
+                        printer.unindent();
+                        printer.println("}");
+                    }
+                }
+            }
+            printer.unindent();
+            printer.println("}");
+            printer.println();
+        }
+
+        @Override
+        protected Void defaultAction(DataType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            String simpleWriter = simpleWriters.get(type.getClass());
+            if(simpleWriter != null){
+                printer.println(
+                    "cos." + simpleWriter + "(%d, %s);",
+                    fieldNum, valueExp);
+            } else{
+                printer.println("// %s %s is ignored",
+                    p.getDataType().getClassName(),
+                    p.getAttributeName());
+            }
+            return null;
+        }
+
+        @Override
+        public Void visitBlobType(BlobType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println("cos.writeBytes(%d, com.google.appengine.repackaged.com" +
+            		".google.protobuf.ByteString.copyFrom(%s.getBytes()));", fieldNum, valueExp);
+            return null;
+        }
+        
+        @Override
+        public Void visitShortBlobType(ShortBlobType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println("cos.writeBytes(%d, com.google.appengine.repackaged.com" +
+                    ".google.protobuf.ByteString.copyFrom(%s.getBytes()));", fieldNum, valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitKeyType(KeyType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println("cos.writeString(%d, com.google.appengine.api.datastore.KeyFactory.keyToString(%s));"
+                , fieldNum, valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitTextType(TextType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println(
+                p.isCipher() ?
+                    "cos.writeString(%d, encrypt(%s.getValue()));" :
+                    "cos.writeString(%d, %s.getValue());",
+                fieldNum,
+                valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitStringType(StringType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println(
+                p.isCipher() ?
+                    "cos.writeString(%d, encrypt(%s));" :
+                    "cos.writeString(%d, %s);",
+                fieldNum,
+                valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitPrimitiveCharType(PrimitiveCharType type,
+                AttributeMetaDesc p) throws RuntimeException {
+            printer.println("cos.writeString(%d, Character.toString(%s));",
+                fieldNum, valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitCollectionType(CollectionType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            DataType et = type.getElementType();
+            if (!isSupportedForJson(et)) {
+                printer.println("// %s is not supported.", et.getClassName());
+                return null;
+            }
+            printer.println("for(%s v : %s){", et.getClassName(), valueExp);
+            printer.indent();
+            ModelToPbMethodGenerator gen =
+                new ModelToPbMethodGenerator(printer, coderExp, "v", fieldNum);
+            et.accept(gen, p);
+            printer.unindent();
+            printer.println("}");
+            return null;
+        }
+
+        @Override
+        public Void visitArrayType(ArrayType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            DataType et = type.getComponentType();
+            if (!isSupportedForJson(et)) {
+                printer.println(
+                    "// %s(%s) is not supported.",
+                    et.getClassName(),
+                    et.getTypeName());
+                return null;
+            }
+            if (et.getClassName().equals("byte")) {
+                printer.println(
+                    "cos.writeBytes(%d, com.google.appengine.repackaged.com.google.protobuf.ByteString.copyFrom(%s));",
+                    fieldNum, valueExp);
+            } else {
+                printer.println("for(%s v : %s){", et.getClassName(), valueExp);
+                printer.indent();
+                ModelToPbMethodGenerator gen =
+                    new ModelToPbMethodGenerator(printer, coderExp, "v", fieldNum);
+                et.accept(gen, p);
+                printer.unindent();
+                printer.println("}");
+            }
+            return null;
+        }
+/*
+        @Override
+        public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println(
+                "%s.encode(writer, %s, maxDepth, currentDepth);",
+                coderExp,
+                valueExp);
+            return null;
+        }
+
+        @Override
+        public Void visitInverseModelRefType(InverseModelRefType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println(
+                "%s.encode(writer, %s, maxDepth, currentDepth);",
+                coderExp,
+                valueExp);
+            return null;
+        }
+*/
+        @SuppressWarnings("serial")
+        private Map<Class<? extends DataType>, String> simpleWriters
+        = new HashMap<Class<? extends DataType>, String>(){{
+            put(PrimitiveBooleanType.class, "writeBool");
+            put(BooleanType.class, "writeBool");
+            put(PrimitiveShortType.class, "writeInt32");
+            put(ShortType.class, "writeInt32");
+            put(PrimitiveIntType.class, "writeInt32");
+            put(IntegerType.class, "writeInt32");
+            put(PrimitiveLongType.class, "writeInt64");
+            put(LongType.class, "writeInt64");
+            put(PrimitiveFloatType.class, "writeFloat");
+            put(FloatType.class, "writeFloat");
+            put(PrimitiveDoubleType.class, "writeDouble");
+            put(DoubleType.class, "writeDouble");
+        }};
+    }
+
+    /**
+     * The method generator for modelToPb method.
+     * 
+     * @author Takao Nakaguchi
+     * 
+     * @since 1.0.6
+     */
+    protected class ComputeModelSizePbMethodGenerator extends
+    SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException> {
+        private final Printer printer;
+        private int fieldNum;
+        private String valueExp;
+ 
+        /**
+         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * 
+         * @param printer
+         *            the printer
+         */
+        public ComputeModelSizePbMethodGenerator(Printer printer) {
+            this.printer = printer;
+        }
+
+        /**
+         * Generates the modelToJson method.
+         */
+        public void generate() {
+            printer.println("@Override");
+            printer.println(
+                    "protected int computeModelSizePb(Object model){");
+            printer.indent();
+            printer.println(
+                "%s m = (%1$s) model;",
+                modelMetaDesc.getModelClassName());
+            printer.println("int size = 0;");
+            if (modelMetaDesc.isAbstrct()) {
+                printer.println(
+                    "throw new %1$s(\"The class(%2$s) is abstract.\");",
+                    UnsupportedOperationException.class.getName(),
+                    modelMetaDesc.getModelClassName());
+            } else {
+                fieldNum = 0;
+                for (AttributeMetaDesc attr : modelMetaDesc
+                    .getAttributeMetaDescList()) {
+                    if (attr.getReadMethodName() == null)
+                        continue;
+                    fieldNum++;
+                    JsonAnnotation ja = attr.getJson();
+                    if (ja.isIgnore())
+                        continue;
+                    DataType dataType = attr.getDataType();
+                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+                        continue;
+                    }
+                    
+                    valueExp = "m." + attr.getReadMethodName() + "()";
+                    dataType.accept(this,  attr);
+                }
+            }
+            printer.println("return size;");
+            printer.unindent();
+            printer.println("}");
+            printer.println();
+        }
+
+        @Override
+        protected Void defaultAction(DataType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            String m = simpleComputers.get(type.getClass());
+            if(m != null){
+                if(!(type instanceof CorePrimitiveType)){
+                    printer.println("if(%s != null){", valueExp);
+                    printer.indent();
+                }
+                printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
+                        ".CodedOutputStream.%s(%d, %s);"
+                        , m, fieldNum, valueExp);
+                if(!(type instanceof CorePrimitiveType)){
+                    printer.unindent();
+                    printer.println("}");
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Void visitKeyType(KeyType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            valueExp = "com.google.appengine.api.datastore.KeyFactory.keyToString(" +
+                    valueExp + ")";
+            return super.visitKeyType(type, p);
+        }
+        
+        @SuppressWarnings("serial")
+        private Map<Class<?>, String> simpleComputers
+        = new HashMap<Class<?>, String>(){{
+            put(StringType.class, "computeStringSize");
+            put(KeyType.class, "computeStringSize");
+            put(PrimitiveBooleanType.class, "computeBoolSize");
+            put(BooleanType.class, "computeBoolSize");
+            put(PrimitiveShortType.class, "computeInt32Size");
+            put(ShortType.class, "computeInt32Size");
+            put(PrimitiveIntType.class, "computeInt32Size");
+            put(IntegerType.class, "computeInt32Size");
+            put(PrimitiveLongType.class, "computeInt64Size");
+            put(LongType.class, "computeInt64Size");
+            put(PrimitiveFloatType.class, "computeFloatSize");
+            put(FloatType.class, "computeFloatSize");
+            put(PrimitiveDoubleType.class, "computeDoubleSize");
+            put(DoubleType.class, "computeDoubleSize");
+        }};
+    }
+
+    /**
+     * The method generator for modelToPb method.
+     * 
+     * @author Takao Nakaguchi
+     * 
+     * @since 1.0.6
+     */
+    protected class WritePbJsMethodGenerator extends
+    SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException> {
+        private final Printer printer;
+        private String name;
+        private int fieldNum;
+ 
+        /**
+         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * 
+         * @param printer
+         *            the printer
+         */
+        public WritePbJsMethodGenerator(Printer printer) {
+            this.printer = printer;
+        }
+
+        /**
+         * Generates the modelToJson method.
+         */
+        public void generate() {
+            printer.println("@Override");
+            printer.println(
+                    "public void writePbJs(java.io.PrintWriter writer)");
+            printer.println("throws java.io.IOException{");
+            printer.indent();
+            if (modelMetaDesc.isAbstrct()) {
+                printer.println(
+                    "throw new %1$s(\"The class(%2$s) is abstract.\");",
+                    UnsupportedOperationException.class.getName(),
+                    modelMetaDesc.getModelClassName());
+            } else {
+                printer.println("writer.println(\"var %s = {\");",
+                    modelMetaDesc.getSimpleName());
+                printer.println("writer.println(\"\\tdef: {\");");
+                fieldNum = 0;
+                for (AttributeMetaDesc attr : modelMetaDesc
+                    .getAttributeMetaDescList()) {
+                    if (attr.getReadMethodName() == null)
+                        continue;
+                    fieldNum++;
+                    JsonAnnotation ja = attr.getJson();
+                    if (ja.isIgnore())
+                        continue;
+                    DataType dataType = attr.getDataType();
+                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+                        continue;
+                    }
+                    name = ja.getAlias();
+                    if (name.length() == 0) {
+                        name = attr.getAttributeName();
+                    }
+                    dataType.accept(this, attr);
+                }
+            }
+            printer.println("writer.println(\"\\t},\");");
+            printer.println("writer.println(\"\\treadModel: function(text){\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(text, this.def);\");");
+            printer.println("writer.println(\"\\t},\");");
+            printer.println("writer.println(\"\\treadModels: function(text){\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(text, this.def);\");");
+            printer.println("writer.println(\"\\t},\");");
+            printer.println("writer.println(\"};\");");
+            printer.unindent();
+            printer.println("}");
+            printer.println();
+        }
+        
+        @Override
+        protected Void defaultAction(DataType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            String m = dataTypeToReadMethod.get(type.getClass());
+            if(m != null){
+                printer.println("writer.println(\"\\t\\t%d: function(cin, v){ " +
+                        "v.%s = cin.%s();},\");"
+                        , fieldNum, name, m);
+            }
+            return null;
+        }
+
+        @SuppressWarnings("serial")
+        private Map<Class<?>, String> dataTypeToReadMethod
+        = new HashMap<Class<?>, String>(){{
+            put(StringType.class, "readString");
+            put(PrimitiveBooleanType.class, "readBool");
+            put(BooleanType.class, "readBool");
+            put(PrimitiveShortType.class, "readInt32");
+            put(ShortType.class, "readInt32");
+            put(PrimitiveIntType.class, "readInt32");
+            put(IntegerType.class, "readInt32");
+            put(PrimitiveLongType.class, "readInt64");
+            put(LongType.class, "readInt64");
+            put(PrimitiveFloatType.class, "readFloat");
+            put(FloatType.class, "readFloat");
+            put(PrimitiveDoubleType.class, "readDouble");
+            put(DoubleType.class, "readDouble");
+            put(KeyType.class, "readString");
+            put(BlobType.class, "readBytes");
+            put(ShortBlobType.class, "readBytes");
+            put(TextType.class, "readString");
+        }};
+    }
+
+
+    class StringTypeHandler{
+        public void handleModelToPb(AttributeMetaDesc p, Printer printer
+                , int fieldNum, String valueExp){
+            printer.println(
+                p.isCipher() ?
+                    "cos.writeString(%d, encrypt(%s));" :
+                    "cos.writeString(%d, %s);",
+                fieldNum,
+                valueExp);
+        }
+        public void handleComputeSize(AttributeMetaDesc p, Printer printer
+                , int fieldNum, String valueExp){
+            printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
+                    ".CodedOutputStream.computeStringSize(%d, %s);"
+                    , fieldNum, valueExp);
+        }
+        public void handleWritePbJs(AttributeMetaDesc p, Printer printer
+                , int fieldNum, String name){
+            printer.println("writer.println(\"\\t\\t%d: function(cin, v){ " +
+                    "v.%s = cin.readString();},\");"
+                    , fieldNum, name);
         }
     }
 
