@@ -15,6 +15,9 @@
  */
 package org.slim3.datastore;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +41,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.repackaged.com.google.protobuf.CodedOutputStream;
 
 /**
  * A meta data of model.
@@ -490,6 +494,54 @@ public abstract class ModelMeta<M> {
     protected <T> T invokeJsonToModel(ModelMeta<T> meta, JsonReader reader
             , int maxDepth, int currentDepth){
         return meta.jsonToModel(reader.read(), maxDepth, currentDepth);
+    }
+
+    public void modelToPb(Object model, OutputStream os)
+    throws IOException{
+        modelToPb(model, os, 0);
+    }
+
+    public void modelToPb(Object model, OutputStream os, int maxDepth)
+    throws IOException{
+        CodedOutputStream cos = CodedOutputStream.newInstance(os);
+        try{
+            modelToPb(cos, model, maxDepth, 0);
+        } finally{
+            cos.flush();
+        }
+    }
+
+    protected void modelToPb(
+            CodedOutputStream cos
+            , java.lang.Object model, int maxDepth, int currentDepth)
+    throws IOException{
+        throw new UnsupportedOperationException();
+    }
+
+    public void modelsToPb(java.lang.Object[] models
+            , OutputStream os)
+    throws java.io.IOException{
+        modelsToPb(models, os, 0, 0);
+    }
+
+    public void modelsToPb(java.lang.Object[] models
+            , OutputStream os, int maxDepth, int currentDepth)
+    throws java.io.IOException{
+        CodedOutputStream cos = CodedOutputStream.newInstance(os);
+        for(Object m : models){
+            cos.writeRawVarint32(computeModelSizePb(m));
+            modelToPb(cos, m, maxDepth, currentDepth);
+        }
+        cos.flush();
+    }
+
+    protected int computeModelSizePb(Object model){
+        throw new UnsupportedOperationException();
+    }
+    
+    public void writePbJs(PrintWriter writer)
+    throws IOException{
+        throw new UnsupportedOperationException();
     }
 
     /**
