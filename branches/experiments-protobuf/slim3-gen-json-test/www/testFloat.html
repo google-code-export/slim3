@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+</head>
+<body>
+<script type="text/javascript">
+<!--
+var rv = 0x3f000000;
+var sign = rv & 0x80000000;
+var exp  = (rv >> 23) & 0xff;
+var frac = rv & 0x7fffff;
+var result = null;
+if (!rv || rv === 0x80000000) { // 0.0 or -0.0
+	result = 0;
+} else if (exp === 0xff) { // NaN or Infinity
+    result = frac ? NaN : Infinity;
+} else{
+	result = (sign ? -1 : 1) * (frac | 0x800000) * Math.pow(2, exp - 127 - 23);
+}
+alert(result);
+alert((1 << 56).toString(2));
+alert((1 << 32).toString(2));
+// -->
+</script>
+results:
+</body>
+</html>

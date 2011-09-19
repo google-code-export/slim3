@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<script type="text/javascript" src="js/pbCommon.js"></script>
+<script type="text/javascript" src="js/pbPrimitivesModelMeta.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+<!--
+var req = new XMLHttpRequest();
+req.open('GET', "primitives.bin", true);
+req.overrideMimeType('text/plain; charset=x-user-defined')
+req.onload = function() {
+	models = PrimitivesModelMeta.readModels(req.responseText);
+	n = models.length;
+	var results = document.getElementById("results");
+	for(i = 0; i < n; i++){
+		for(v in models[i]){
+			ele = document.createElement("div");
+			node = document.createTextNode(v + ": " + models[i][v]);
+			ele.appendChild(node);
+			results.appendChild(ele);
+		}
+	}
+}
+req.send();
+// -->
+</script>
+results:
+<span id="results"></span>
+</body>
+</html>
