@@ -1,11 +1,10 @@
 package org.slim3.json.test.issue_protobuf;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 
 public class PrimitivesAndStringPerformance {
     public static void main(String[] args) throws Exception{
-        System.out.println(PrimitivesAndStringModelMeta.get()
-            .modelToJson(PrimitivesAndStringModel.createModel(1)));
         speed(1);
         speed(1000);
         speed(10000);
@@ -33,7 +32,8 @@ public class PrimitivesAndStringPerformance {
             long s = System.currentTimeMillis();
             for(int i = 0; i < n; i++){
                 for(int j = 0; j < 100; j++){
-                    meta.modelToJson(models[j]);
+                    new OutputStreamWriter(new ByteArrayOutputStream(), "UTF-8")
+                        .write(meta.modelToJson(models[j]));
                 }
             }
             long d = System.currentTimeMillis() - s;
