@@ -46,6 +46,7 @@ import static org.slim3.gen.ClassConstants.LinkedHashSet;
 import static org.slim3.gen.ClassConstants.LinkedList;
 import static org.slim3.gen.ClassConstants.Long;
 import static org.slim3.gen.ClassConstants.ModelListener;
+import static org.slim3.gen.ClassConstants.ModelMeta;
 import static org.slim3.gen.ClassConstants.ModelRef;
 import static org.slim3.gen.ClassConstants.ModelRefAttributeMeta;
 import static org.slim3.gen.ClassConstants.Object;
@@ -2956,7 +2957,7 @@ public class ModelMetaGenerator implements Generator {
             printer.println("@Override");
             printer
                 .println(
-                    "protected void modelToPb(com.google.appengine.repackaged.com.google.protobuf" +
+                    "public void modelToPb(com.google.appengine.repackaged.com.google.protobuf" +
                     ".CodedOutputStream cos, %s model, int maxDepth, int currentDepth)",
                     Object);
             printer.println("throws java.io.IOException{");
@@ -2999,7 +3000,6 @@ public class ModelMetaGenerator implements Generator {
                             printer.printWithoutIndent(
                                 " && %s.getKey() != null",
                                 valueExp);
-                            valueExp = valueExp + ".getKey()";
                        } else if (dataType instanceof InverseModelRefType) {
                             printer.printWithoutIndent(
                                 " && getKey(m) != null"
@@ -3141,17 +3141,29 @@ public class ModelMetaGenerator implements Generator {
             }
             return null;
         }
-/*
+        
         @Override
         public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
                 throws RuntimeException {
-            printer.println(
-                "%s.encode(writer, %s, maxDepth, currentDepth);",
-                coderExp,
-                valueExp);
+            printer.println("if(currentDepth == maxDepth){");
+            printer.indent();
+            printer.println("cos.writeString(%d, %s.keyToString(%s.getKey()));"
+                , fieldNum, "org.slim3.datastore.Datastore", valueExp);
+            printer.println("return;");
+            printer.unindent();
+            printer.println("}");
+            printer.println("Object rm = %s.getModel();"
+                , valueExp);
+            printer.println("%s<?> meta = %s.getModelMeta(rm.getClass());"
+                , ModelMeta, "org.slim3.datastore.Datastore");
+            printer.println("cos.writeTag(%d, com.google.appengine.repackaged.com.google.protobuf.WireFormat.WIRETYPE_LENGTH_DELIMITED);"
+                , fieldNum);
+            printer.println("cos.writeRawVarint32(meta.computeModelSizePb(rm));");
+            printer.println("meta.modelToPb(cos, rm, maxDepth, currentDepth);");
             return null;
         }
 
+/*        
         @Override
         public Void visitInverseModelRefType(InverseModelRefType type, AttributeMetaDesc p)
                 throws RuntimeException {
@@ -3204,12 +3216,12 @@ public class ModelMetaGenerator implements Generator {
         }
 
         /**
-         * Generates the modelToJson method.
+         * Generates the computeModelSizePb method.
          */
         public void generate() {
             printer.println("@Override");
             printer.println(
-                    "protected int computeModelSizePb(Object model){");
+                    "public int computeModelSizePb(Object model){");
             printer.indent();
             printer.println(
                 "%s m = (%1$s) model;",
@@ -3268,9 +3280,15 @@ public class ModelMetaGenerator implements Generator {
         @Override
         public Void visitKeyType(KeyType type, AttributeMetaDesc p)
                 throws RuntimeException {
-            valueExp = "com.google.appengine.api.datastore.KeyFactory.keyToString(" +
-                    valueExp + ")";
-            return super.visitKeyType(type, p);
+            printer.println("if(%s != null){", valueExp);
+            printer.indent();
+            printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
+                    ".CodedOutputStream.computeStringSize(%d, %s);"
+                    , fieldNum, "com.google.appengine.api.datastore.KeyFactory.keyToString(" +
+                    valueExp + ")");
+            printer.unindent();
+            printer.println("}");
+            return null;
         }
         
         @SuppressWarnings("serial")
