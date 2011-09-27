@@ -42,6 +42,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.repackaged.com.google.protobuf.CodedOutputStream;
+import com.google.appengine.repackaged.com.google.protobuf.WireFormat;
 
 /**
  * A meta data of model.
@@ -511,7 +512,7 @@ public abstract class ModelMeta<M> {
         }
     }
 
-    protected void modelToPb(
+    public void modelToPb(
             CodedOutputStream cos
             , java.lang.Object model, int maxDepth, int currentDepth)
     throws IOException{
@@ -535,7 +536,15 @@ public abstract class ModelMeta<M> {
         cos.flush();
     }
 
-    protected int computeModelSizePb(Object model){
+    protected void invokeModelToPb(ModelMeta<?> meta, CodedOutputStream cos
+            , int fieldNum, Object model, int maxDepth, int currentDepth)
+    throws IOException{
+        cos.writeTag(fieldNum, WireFormat.WIRETYPE_LENGTH_DELIMITED);
+        cos.writeRawVarint32(meta.computeModelSizePb(model));
+        meta.modelToPb(cos, model, maxDepth, currentDepth);
+    }
+
+    public int computeModelSizePb(Object model){
         throw new UnsupportedOperationException();
     }
     
