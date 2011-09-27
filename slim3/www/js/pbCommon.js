@@ -81,13 +81,31 @@ var pbCommon = {
 		};
 		this.readRawVarint64 = function(){
 			shift = 0;
-			result = 0;
-			while (shift < 64) {
+			hiInt = 0;
+			lowInt = 0;
+			while (shift < 21) {
 				b = this.readRawByte();
 				if(b == null) return null;
-				result |= (b & 0x7F) << shift;
+				lowInt |= (b & 0x7F) << shift;
 				if ((b & 0x80) == 0) {
-					return result;
+					return new Array(hiInt, lowInt);
+				}
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			lowInt |= (b & 0xF) << shift;
+			hiInt |= (b & 0x70) >> 4;
+			if ((b & 0x80) == 0) {
+				return new Array(hiInt, rowInt);
+			}
+			shift = shift + 7 - 32;
+			while (shift < 32) {
+				b = this.readRawByte();
+				if(b == null) return null;
+				hiInt |= (b & 0x7F) << shift;
+				if ((b & 0x80) == 0) {
+					return new Array(hiInt, lowInt);
 				}
 				shift += 7;
 			}
@@ -149,16 +167,23 @@ var pbCommon = {
 			return (sign ? -1 : 1) * (frac | 0x800000) * Math.pow(2, exp - 127 - 23);
 		};
 		this.readDouble = function(){
-			rv = this.readRawLittleEndian64();
-			sign = rv & 0x8000000000000000;
-			exp  = (rv / Math.pow(2, 52)) & 0x7ff;
-			frac = rv & 0xfffffffffffff;
-			if(!rv || rv === 0x8000000000000000){ // 0.0 or -0.0
-				return 0;
-			}
-			if(exp === 0x7ff){ // NaN or Infinity
-				return frac ? NaN : Infinity;
-			}
+			b1 = this.readRawByte();
+			b2 = this.readRawByte();
+			b3 = this.readRawByte();
+			b4 = this.readRawByte();
+			b5 = this.readRawByte();
+			b6 = this.readRawByte();
+			b7 = this.readRawByte();
+			b8 = this.readRawByte();
+			frac =
+				b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+				(b5 * Math.pow(2, 32)) +
+				(b6 * Math.pow(2, 40)) +
+				((b7 & 0x0f) * Math.pow(2, 48));
+			exp = 
+				((b7 & 0xf0) / Math.pow(2, 4)) +
+				((b8 & 0x7f) * Math.pow(2, 4));
+			sign = b8 & 0x80;
 			return (sign ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
 		};
 		this.readBool = function(){
@@ -208,4 +233,3 @@ var pbCommon = {
 		return models;
 	}
 };
-

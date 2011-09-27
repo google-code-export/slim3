@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 </head>
 <body>
+results:
 <script type="text/javascript">
 <!--
 var rv = 0x3f000000;
@@ -18,11 +19,10 @@ if (!rv || rv === 0x80000000) { // 0.0 or -0.0
 } else{
 	result = (sign ? -1 : 1) * (frac | 0x800000) * Math.pow(2, exp - 127 - 23);
 }
-alert(result);
-alert((1 << 56).toString(2));
-alert((1 << 32).toString(2));
+document.write("<p>" + result + "</p>");
+document.write("<p>" + (1 << 56).toString(2) + "</p>");
+document.write("<p>" + (1 << 32).toString(2) + "</p>");
 // -->
 </script>
-results:
 </body>
 </html>
