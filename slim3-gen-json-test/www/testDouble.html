@@ -6,8 +6,10 @@
 <script type="text/javascript" src="js/pbDoubleModelMeta.js"></script>
 </head>
 <body>
-<p>expected: 3.2305409446133365E24</p>
-<p>actual: <span id="actual"></span></p>
+<p>expected1: 3.2305409446133365E24</p>
+<p>expected2: -233323.4333584</p>
+<p>actual1: <span id="actual1"></span></p>
+<p>actual2: <span id="actual2"></span></p>
 <p>nan: <span id="nan"></span></p>
 <p>posiinf: <span id="posiinf"></span></p>
 <p>negainf: <span id="negainf"></span></p>
@@ -18,7 +20,8 @@ req.open('GET', "double.bin", true);
 req.overrideMimeType('text/plain; charset=x-user-defined')
 req.onload = function() {
 	model = DoubleModelMeta.readModel(req.responseText);
-	document.getElementById("actual").innerHTML = model.doubleValue;
+	document.getElementById("actual1").innerHTML = model.doubleValue;
+	document.getElementById("actual2").innerHTML = model.negativeDoubleValue;
 	document.getElementById("nan").innerHTML = model.nanValue;
 	document.getElementById("posiinf").innerHTML = model.infinityValue;
 	document.getElementById("negainf").innerHTML = model.negativeInfinityValue;

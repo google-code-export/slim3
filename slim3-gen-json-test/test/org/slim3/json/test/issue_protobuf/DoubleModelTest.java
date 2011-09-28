@@ -16,6 +16,7 @@ public class DoubleModelTest extends AppEngineTestCase {
             d += d * 2 + 1;
         }
         m.setDoubleValue(d);
+        m.setNegativeDoubleValue(-233323.4333584);
         
         System.out.println(Long.toString(Double.doubleToRawLongBits(d), 2));
         
