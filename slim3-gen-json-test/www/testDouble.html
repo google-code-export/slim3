@@ -8,6 +8,9 @@
 <body>
 <p>expected: 3.2305409446133365E24</p>
 <p>actual: <span id="actual"></span></p>
+<p>nan: <span id="nan"></span></p>
+<p>posiinf: <span id="posiinf"></span></p>
+<p>negainf: <span id="negainf"></span></p>
 <script type="text/javascript">
 <!--
 var req = new XMLHttpRequest();
@@ -15,10 +18,13 @@ req.open('GET', "double.bin", true);
 req.overrideMimeType('text/plain; charset=x-user-defined')
 req.onload = function() {
 	model = DoubleModelMeta.readModel(req.responseText);
-	results = document.getElementById("actual");
-	results.innerHTML = model.doubleValue;
+	document.getElementById("actual").innerHTML = model.doubleValue;
+	document.getElementById("nan").innerHTML = model.nanValue;
+	document.getElementById("posiinf").innerHTML = model.infinityValue;
+	document.getElementById("negainf").innerHTML = model.negativeInfinityValue;
 }
 req.send();
+/*
 document.write(
 		"<p>" + ((0xff << 24) + (0xff * Math.pow(2, 32))).toString(16) + "</p>"
 		);
@@ -34,6 +40,121 @@ document.write(
 document.write(
 		"<p>" + ((0xff << 24) >>> 0).toString(16) + "</p>"
 		);
+document.write(
+		"<p>" + (255 & 0xff) + "</p>"
+		);
+
+function readDouble1(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		(b5 * Math.pow(2, 32)) +
+		(b6 * Math.pow(2, 40)) +
+		((b7 & 0x0f) * Math.pow(2, 48));
+	exp = 
+		((b7 & 0xf0) / Math.pow(2, 4)) +
+		((b8 & 0x7f) * Math.pow(2, 4));
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+function readDouble2(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * Math.pow(2, 32));
+	exp = 
+		((b7 & 0xf0) / Math.pow(2, 4)) +
+		((b8 & 0x7f) * Math.pow(2, 4));
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+function readDouble3(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * Math.pow(2, 32));
+	mp24 = Math.pow(2, 4);
+	exp = 
+		((b7 & 0xf0) / mp24) +
+		((b8 & 0x7f) * mp24);
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+var mp2_4 = Math.pow(2, 4);
+var mp2_32 = Math.pow(2, 32);
+var mp2_40 = Math.pow(2, 40);
+var mp2_48 = Math.pow(2, 48);
+function readDouble4(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * mp2_32);
+	exp = 
+		((b7 & 0xf0) / mp2_4) +
+		((b8 & 0x7f) * mp2_4);
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+function readDouble5(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * mp2_32);
+	exp = 
+		((b7 & 0xf0) / mp2_4) +
+		((b8 & 0x7f) * mp2_4);
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1075);
+}
+function readDouble6(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	var frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * mp2_32);
+	var exp = 
+		((b7 & 0xf0) >> 4) + ((b8 & 0x7f) << 4);
+//	sign = b8;
+	return (b8 < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+function readDouble7(){
+	b1 = 1; b2 = 2; b3 = 3; b4 = 4;
+	b5 = 5; b6 = 6; b7 = 7; b8 = 8;
+	frac =
+		b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+		(b5 * mp2_32) + (b6 * mp2_40) + ((b7 & 0x0f) * mp2_48);
+	exp = 
+		((b7 & 0xf0) >> 4) + ((b8 & 0x7f) << 4);
+	sign = b8;
+	return (sign < 0 ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+}
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble1();
+document.write("<p>readDouble1: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble2();
+document.write("<p>readDouble2: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble3();
+document.write("<p>readDouble3: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble4();
+document.write("<p>readDouble4: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble5();
+document.write("<p>readDouble5: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble6();
+document.write("<p>readDouble6: " + (new Date - s) + "</p>");
+s = new Date;
+for(i = 0; i < 1000000; i++) readDouble7();
+document.write("<p>readDouble7: " + (new Date - s) + "</p>");
+*/
 // -->
 </script>
 </body>

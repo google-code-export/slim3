@@ -24,7 +24,28 @@ public class DoubleModel {
     public void setDoubleValue(double doubleValue) {
         this.doubleValue = doubleValue;
     }
+    public double getNanValue() {
+        return nanValue;
+    }
+    public void setNanValue(double nanValue) {
+        this.nanValue = nanValue;
+    }
+    public double getInfinityValue() {
+        return infinityValue;
+    }
+    public void setInfinityValue(double infinityValue) {
+        this.infinityValue = infinityValue;
+    }
+    public double getNegativeInfinityValue() {
+        return negativeInfinityValue;
+    }
+    public void setNegativeInfinityValue(double negativeInfinityValue) {
+        this.negativeInfinityValue = negativeInfinityValue;
+    }
     @Attribute(primaryKey=true)
     private Key key;
     private double doubleValue;
+    private double nanValue = Double.NaN;
+    private double infinityValue = Double.POSITIVE_INFINITY;
+    private double negativeInfinityValue = Double.NEGATIVE_INFINITY;
 }
