@@ -24,6 +24,12 @@ public class DoubleModel {
     public void setDoubleValue(double doubleValue) {
         this.doubleValue = doubleValue;
     }
+    public double getNegativeDoubleValue() {
+        return negativeDoubleValue;
+    }
+    public void setNegativeDoubleValue(double negativeDoubleValue) {
+        this.negativeDoubleValue = negativeDoubleValue;
+    }
     public double getNanValue() {
         return nanValue;
     }
@@ -45,6 +51,7 @@ public class DoubleModel {
     @Attribute(primaryKey=true)
     private Key key;
     private double doubleValue;
+    private double negativeDoubleValue;
     private double nanValue = Double.NaN;
     private double infinityValue = Double.POSITIVE_INFINITY;
     private double negativeInfinityValue = Double.NEGATIVE_INFINITY;
