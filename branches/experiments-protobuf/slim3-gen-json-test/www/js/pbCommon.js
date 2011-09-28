@@ -22,6 +22,8 @@ var pbCommon = {
 		};
 	},
 	CodedInputStream: function(is){
+		this.mp2_4 = Math.pow(2, 4);
+		this.mp2_32 = Math.pow(2, 32);
 		this.is = is;
 		this.pushLimit = function(size){
 			this.is.pushLimit(size);
@@ -66,37 +68,55 @@ var pbCommon = {
 		};
 		this.readRawVarint64 = function(){
 			shift = 0;
-			result = 0;
-			while (shift < 64) {
+			hiInt = 0;
+			lowInt = 0;
+			while (shift < 21) {
 				b = this.readRawByte();
 				if(b == null) return null;
-				result |= (b & 0x7F) << shift;
+				lowInt |= (b & 0x7F) << shift;
 				if ((b & 0x80) == 0) {
-					return result;
+					return new Array(hiInt, lowInt);
+				}
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			lowInt |= (b & 0xF) << shift;
+			hiInt |= (b & 0x70) >> 4;
+			if ((b & 0x80) == 0) {
+				return new Array(hiInt, rowInt);
+			}
+			shift = shift + 7 - 32;
+			while (shift < 32) {
+				b = this.readRawByte();
+				if(b == null) return null;
+				hiInt |= (b & 0x7F) << shift;
+				if ((b & 0x80) == 0) {
+					return new Array(hiInt, lowInt);
 				}
 				shift += 7;
 			}
 			throw Error("malformedVarint");
 		};
 		this.readRawLittleEndian32 = function(){
-			b1 = this.readRawByte();
-			b2 = this.readRawByte();
-			b3 = this.readRawByte();
-			b4 = this.readRawByte();
-			return  (b1      ) |
-					(b2 <<  8) |
-					(b3 << 16) |
-					(b4 << 24);
+			var b1 = this.readRawByte();
+			var b2 = this.readRawByte();
+			var b3 = this.readRawByte();
+			var b4 = this.readRawByte();
+			return  (b1      ) +
+					(b2 <<  8) +
+					(b3 << 16) +
+					((b4 << 24) >>> 0);
 		};
 		this.readRawLittleEndian64 = function(){
-			b1 = this.readRawByte();
-			b2 = this.readRawByte();
-			b3 = this.readRawByte();
-			b4 = this.readRawByte();
-			b5 = this.readRawByte();
-			b6 = this.readRawByte();
-			b7 = this.readRawByte();
-			b8 = this.readRawByte();
+			var b1 = this.readRawByte();
+			var b2 = this.readRawByte();
+			var b3 = this.readRawByte();
+			var b4 = this.readRawByte();
+			var b5 = this.readRawByte();
+			var b6 = this.readRawByte();
+			var b7 = this.readRawByte();
+			var b8 = this.readRawByte();
 			return  (b1      ) +
 					(b2 <<  8) +
 					(b3 << 16) +
@@ -110,7 +130,7 @@ var pbCommon = {
 			return this.readRawVarint32();
 		};
 		this.readFieldNum = function(){
-			t = this.readTag();
+			var t = this.readTag();
 			if(t != null) return t >> 3;
 			return t;
 		};
@@ -121,30 +141,40 @@ var pbCommon = {
 			return this.readRawVarint64();
 		};
 		this.readFloat = function(){
-			rv = this.readRawLittleEndian32();
-			sign = rv & 0x80000000;
-			exp  = (rv >> 23) & 0xff;
-			frac = rv & 0x7fffff;
-			if(!rv || rv === 0x80000000){ // 0.0 or -0.0
-				return 0;
+			var b1 = this.readRawByte();
+			var b2 = this.readRawByte();
+			var b3 = this.readRawByte();
+			var b4 = this.readRawByte();
+			var frac = b1 + (b2 << 8) + ((b3 & 0x7f) << 16);
+			var exp = (b3 >> 7) + ((b4 & 0x7f) << 1);
+			var sign = (b4 & 0x80) != 0 ? -1 : 1;
+			if(frac == 0 && exp == 0) return 0;
+			if(exp === 0xff){
+				return frac != 0 ? NaN : (sign * Infinity);
 			}
-			if(exp === 0xff){ // NaN or Infinity
-				return frac ? NaN : Infinity;
-			}
-			return (sign ? -1 : 1) * (frac | 0x800000) * Math.pow(2, exp - 127 - 23);
+			return sign * (frac + 0x800000) * Math.pow(2, exp - 127 - 23);
 		};
 		this.readDouble = function(){
-			rv = this.readRawLittleEndian64();
-			sign = rv & 0x8000000000000000;
-			exp  = (rv / Math.pow(2, 52)) & 0x7ff;
-			frac = rv & 0xfffffffffffff;
-			if(!rv || rv === 0x8000000000000000){ // 0.0 or -0.0
-				return 0;
+			var b1 = this.readRawByte();
+			var b2 = this.readRawByte();
+			var b3 = this.readRawByte();
+			var b4 = this.readRawByte();
+			var b5 = this.readRawByte();
+			var b6 = this.readRawByte();
+			var b7 = this.readRawByte();
+			var b8 = this.readRawByte();
+			var frac =
+				b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+				((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * this.mp2_32);
+			var exp = 
+				((b7 & 0xf0) >> 4) +
+				((b8 & 0x7f) << 4);
+			var sign = (b8 & 0x80) != 0 ? -1 : 1;
+			if(frac == 0 && exp == 0) return 0;
+			if(exp === 0x7ff){
+				return frac != 0 ? NaN : (sign * Infinity);
 			}
-			if(exp === 0x7ff){ // NaN or Infinity
-				return frac ? NaN : Infinity;
-			}
-			return (sign ? -1 : 1) * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+			return sign * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
 		};
 		this.readBool = function(){
 			r = this.readRawVarint32();
