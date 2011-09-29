@@ -24,7 +24,21 @@ public class LongModel {
     public void setLongValue(long longValue) {
         this.longValue = longValue;
     }
+    public long getMaxValue() {
+        return maxValue;
+    }
+    public void setMaxValue(long maxValue) {
+        this.maxValue = maxValue;
+    }
+    public long getMinValue() {
+        return minValue;
+    }
+    public void setMinValue(long minValue) {
+        this.minValue = minValue;
+    }
     @Attribute(primaryKey=true)
     private Key key;
     private long longValue;
+    private long maxValue = Long.MAX_VALUE;
+    private long minValue = Long.MIN_VALUE;
 }
