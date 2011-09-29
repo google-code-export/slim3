@@ -1,3 +1,18 @@
+/*
+ * Copyright 2004-2010 the Seasar Foundation and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 var pbCommon = {
 	TextInputStream: function(text){
 		index = 0;
@@ -35,10 +50,10 @@ var pbCommon = {
 			return this.is.read();
 		}
 		this.readRawVarint32 = function(){
-			tmp = this.readRawByte();
+			var tmp = this.readRawByte();
 			if(tmp == null) return null;
 			if(tmp >= 0) return tmp;
-			result = tmp & 0x7f;
+			var result = tmp & 0x7f;
 			if((tmp = this.readRawByte()) >= 0) {
 				result |= tmp << 7;
 			} else {
@@ -67,13 +82,34 @@ var pbCommon = {
 			return result;
 		};
 		this.readRawVarint64 = function(){
-			shift = 0;
-			hiInt = 0;
-			lowInt = 0;
-			while (shift < 21) {
+			var b = this.readRawByte();
+			if(b == null) return null;
+			var lowInt = b & 0x7f;
+			if((b & 0x80) == 0){
+				return new Array(0, lowInt);
+			}
+			var shift = 7;
+			while(shift <= 21){
 				b = this.readRawByte();
 				if(b == null) return null;
-				lowInt |= (b & 0x7F) << shift;
+				lowInt += (b & 0x7f) << shift;
+				if ((b & 0x80) == 0) {
+					return new Array(0, lowInt);
+				}
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			lowInt += ((b & 0xf) << 28) >>> 0;
+			var hiInt = (b & 0x70) >> 4;
+			if ((b & 0x80) == 0){
+				return new Array(hiInt, lowInt);
+			}
+			shift = 3;
+			while(shift <= 24){
+				b = this.readRawByte();
+				if(b == null) return null;
+				hiInt += (b & 0x7F) << shift;
 				if ((b & 0x80) == 0) {
 					return new Array(hiInt, lowInt);
 				}
@@ -81,20 +117,9 @@ var pbCommon = {
 			}
 			b = this.readRawByte();
 			if(b == null) return null;
-			lowInt |= (b & 0xF) << shift;
-			hiInt |= (b & 0x70) >> 4;
+			hiInt += ((b & 0x1) << shift) >>> 0;
 			if ((b & 0x80) == 0) {
-				return new Array(hiInt, rowInt);
-			}
-			shift = shift + 7 - 32;
-			while (shift < 32) {
-				b = this.readRawByte();
-				if(b == null) return null;
-				hiInt |= (b & 0x7F) << shift;
-				if ((b & 0x80) == 0) {
-					return new Array(hiInt, lowInt);
-				}
-				shift += 7;
+				return new Array(hiInt, lowInt);
 			}
 			throw Error("malformedVarint");
 		};
@@ -103,10 +128,7 @@ var pbCommon = {
 			var b2 = this.readRawByte();
 			var b3 = this.readRawByte();
 			var b4 = this.readRawByte();
-			return  (b1      ) +
-					(b2 <<  8) +
-					(b3 << 16) +
-					((b4 << 24) >>> 0);
+			return b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0);
 		};
 		this.readRawLittleEndian64 = function(){
 			var b1 = this.readRawByte();
@@ -117,14 +139,10 @@ var pbCommon = {
 			var b6 = this.readRawByte();
 			var b7 = this.readRawByte();
 			var b8 = this.readRawByte();
-			return  (b1      ) +
-					(b2 <<  8) +
-					(b3 << 16) +
-					(b4 << 24) +
-					(b5 * Math.pow(2, 32)) +
-					(b6 * Math.pow(2, 40)) +
-					(b7 * Math.pow(2, 48)) +
-					(b8 * Math.pow(2, 56));
+			return new Array(
+					b5 + (b6 << 8) + (b7 << 16) + ((b8 << 24) >>> 0)
+					, b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0)
+					);
 		};
 		this.readTag = function(){
 			return this.readRawVarint32();
@@ -182,9 +200,9 @@ var pbCommon = {
 			return r != 0;
 		};
 		this.readString = function(){
-			size = this.readRawVarint32();
+			var size = this.readRawVarint32();
 			if(size == null) return;
-			bytes = [];
+			var bytes = [];
 			for(i = 0; i < size; i++){
 				v = this.readRawByte();
 				if(v == null){
@@ -196,25 +214,25 @@ var pbCommon = {
 		};
 	},
 	doReadModel: function(cin, def){
-		ret = {};
+		var ret = {};
 		while(true){
-			n = cin.readFieldNum();
+			var n = cin.readFieldNum();
 			if(n == null) break;
-			d = def[n];
+			var d = def[n];
 			if(d != null) def[n](cin, ret);
 		}
 		return ret;
 	},
 	readModel: function(text, def){
-		cin = new this.CodedInputStream(new this.TextInputStream(text));
+		var cin = new this.CodedInputStream(new this.TextInputStream(text));
 		return this.doReadModel(cin, def);
 	},
 	readModels: function(text, def){
-		cin = new this.CodedInputStream(new this.TextInputStream(text));
-		models = [];
+		var cin = new this.CodedInputStream(new this.TextInputStream(text));
+		var models = [];
 		while((size = cin.readRawVarint32()) != null){
 			cin.pushLimit(size);
-			m = this.doReadModel(cin, def);
+			var m = this.doReadModel(cin, def);
 			cin.popLimit();
 			if(m != null){
 				models.push(m);

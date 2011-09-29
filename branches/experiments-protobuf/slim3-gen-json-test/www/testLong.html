@@ -8,6 +8,8 @@
 <body>
 <p>expected: 0x20000000000000</p>
 <p>actual: <span id="actual"></span></p>
+<p>max: <span id="max"></span></p>
+<p>min: <span id="min"></span></p>
 <script type="text/javascript">
 <!--
 var req = new XMLHttpRequest();
@@ -15,9 +17,12 @@ req.open('GET', "long.bin", true);
 req.overrideMimeType('text/plain; charset=x-user-defined')
 req.onload = function() {
 	model = LongModelMeta.readModel(req.responseText);
-	results = document.getElementById("actual");
-	results.innerHTML = "0x" + model.longValue[0].toString(16)
-		+ model.longValue[1].toString(16);
+	document.getElementById("actual").innerHTML
+		= "0x" + model.longValue[0].toString(16) + ":" + model.longValue[1].toString(16);
+	document.getElementById("max").innerHTML
+		= "0x" + model.maxValue[0].toString(16) + ":" + model.maxValue[1].toString(16);
+	document.getElementById("min").innerHTML
+		= "0x" + model.minValue[0].toString(16) + ":" + model.minValue[1].toString(16);
 }
 req.send();
 // -->
