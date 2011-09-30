@@ -6,13 +6,18 @@
 <script type="text/javascript" src="js/pbDoubleModelMeta.js"></script>
 </head>
 <body>
-<p>expected1: 3.2305409446133365E24</p>
-<p>expected2: -233323.4333584</p>
-<p>actual1: <span id="actual1"></span></p>
-<p>actual2: <span id="actual2"></span></p>
+<div style="width: 400px; text-align: right">
+<p>expected1: 3.2305409446133365e+24<br>actual1: <span id="actual1"></span></p>
+<p>expected2: -233323.4333584<br>actual2: <span id="actual2"></span></p>
+<p>maxValue: 1.7976931348623157e+308<br>actual: <span id="maxValue"></span></p>
+<p>minValue: 4.9e-324<br>actual: <span id="minValue"></span></p>
+<p>minM2Value: 1.0e-323<br>actual: <span id="minM2Value"></span></p>
+<p>minNormalValue: 2.2250738585072014e-308<br>actual: <span id="minNormalValue"></span></p>
 <p>nan: <span id="nan"></span></p>
 <p>posiinf: <span id="posiinf"></span></p>
 <p>negainf: <span id="negainf"></span></p>
+</div>
+
 <script type="text/javascript">
 <!--
 var req = new XMLHttpRequest();
@@ -22,11 +27,18 @@ req.onload = function() {
 	model = DoubleModelMeta.readModel(req.responseText);
 	document.getElementById("actual1").innerHTML = model.doubleValue;
 	document.getElementById("actual2").innerHTML = model.negativeDoubleValue;
+	document.getElementById("maxValue").innerHTML = model.maxValue;
+	document.getElementById("minValue").innerHTML = Math.pow(2, -1074);//model.minValue.toString(16);
+	document.getElementById("minM2Value").innerHTML = model.minM2Value;
+	document.getElementById("minNormalValue").innerHTML = model.minNormalValue
 	document.getElementById("nan").innerHTML = model.nanValue;
 	document.getElementById("posiinf").innerHTML = model.infinityValue;
 	document.getElementById("negainf").innerHTML = model.negativeInfinityValue;
 }
 req.send();
+document.write("<p>max: " + Number.MAX_VALUE + "</p>");
+document.write("<p>min: " + Number.MIN_VALUE + "</p>");
+document.write("<p>minm2: " + (Number.MIN_VALUE + Number.MIN_VALUE) + "</p>");
 /*
 document.write(
 		"<p>" + ((0xff << 24) + (0xff * Math.pow(2, 32))).toString(16) + "</p>"

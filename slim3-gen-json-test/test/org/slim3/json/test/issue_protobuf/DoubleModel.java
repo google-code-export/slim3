@@ -48,10 +48,38 @@ public class DoubleModel {
     public void setNegativeInfinityValue(double negativeInfinityValue) {
         this.negativeInfinityValue = negativeInfinityValue;
     }
+    public double getMaxValue() {
+        return maxValue;
+    }
+    public void setMaxValue(double maxValue) {
+        this.maxValue = maxValue;
+    }
+    public double getMinNormalValue() {
+        return minNormalValue;
+    }
+    public void setMinNormalValue(double minNormalValue) {
+        this.minNormalValue = minNormalValue;
+    }
+    public double getMinValue() {
+        return minValue;
+    }
+    public void setMinValue(double minValue) {
+        this.minValue = minValue;
+    }
+    public double getMinM2Value() {
+        return minM2Value;
+    }
+    public void setMinM2Value(double minM2Value) {
+        this.minM2Value = minM2Value;
+    }
     @Attribute(primaryKey=true)
     private Key key;
     private double doubleValue;
     private double negativeDoubleValue;
+    private double maxValue = Double.MAX_VALUE;
+    private double minValue = Double.MIN_VALUE;
+    private double minM2Value = Double.MIN_VALUE + Double.MIN_VALUE;
+    private double minNormalValue = Double.MIN_NORMAL;
     private double nanValue = Double.NaN;
     private double infinityValue = Double.POSITIVE_INFINITY;
     private double negativeInfinityValue = Double.NEGATIVE_INFINITY;
