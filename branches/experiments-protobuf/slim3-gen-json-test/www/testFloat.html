@@ -2,26 +2,41 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<script type="text/javascript" src="js/pbCommon.js"></script>
+<script type="text/javascript" src="js/pbFloatModelMeta.js"></script>
 </head>
 <body>
-results:
+<div style="width: 400px; text-align: right">
+<p>expected1: 3.230540819679854e+24</p>
+<p>expected2: -233323.4375</p>
+<p>actual1: <span id="actual1"></span></p>
+<p>actual2: <span id="actual2"></span></p>
+<p>maxValue: 3.4028234663852886e+38<br>actual: <span id="maxValue"></span></p>
+<p>minValue: 1.401298464324817e-45<br>actual: <span id="minValue"></span></p>
+<p>minP1Value: 2.802596928649634e-45<br>actual: <span id="minP1Value"></span></p>
+<p>minNormalValue: 1.1754943508222875e-38<br>actual: <span id="minNormalValue"></span></p>
+<p>nan: <span id="nan"></span></p>
+<p>posiinf: <span id="posiinf"></span></p>
+<p>negainf: <span id="negainf"></span></p>
+</div>
 <script type="text/javascript">
 <!--
-var rv = 0x3f000000;
-var sign = rv & 0x80000000;
-var exp  = (rv >> 23) & 0xff;
-var frac = rv & 0x7fffff;
-var result = null;
-if (!rv || rv === 0x80000000) { // 0.0 or -0.0
-	result = 0;
-} else if (exp === 0xff) { // NaN or Infinity
-    result = frac ? NaN : Infinity;
-} else{
-	result = (sign ? -1 : 1) * (frac | 0x800000) * Math.pow(2, exp - 127 - 23);
+var req = new XMLHttpRequest();
+req.open('GET', "float.bin", true);
+req.overrideMimeType('text/plain; charset=x-user-defined')
+req.onload = function() {
+	model = FloatModelMeta.readModel(req.responseText);
+	document.getElementById("actual1").innerHTML = model.floatValue;
+	document.getElementById("actual2").innerHTML = model.negativeFloatValue;
+	document.getElementById("maxValue").innerHTML = model.maxValue;
+	document.getElementById("minValue").innerHTML = model.minValue;
+	document.getElementById("minP1Value").innerHTML = model.minP1Value;
+	document.getElementById("minNormalValue").innerHTML = model.minNormalValue;
+	document.getElementById("nan").innerHTML = model.nanValue;
+	document.getElementById("posiinf").innerHTML = model.infinityValue;
+	document.getElementById("negainf").innerHTML = model.negativeInfinityValue;
 }
-document.write("<p>" + result + "</p>");
-document.write("<p>" + (1 << 56).toString(2) + "</p>");
-document.write("<p>" + (1 << 32).toString(2) + "</p>");
+req.send();
 // -->
 </script>
 </body>

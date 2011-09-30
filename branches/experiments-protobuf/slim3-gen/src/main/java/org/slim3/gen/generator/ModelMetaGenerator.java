@@ -3348,36 +3348,60 @@ public class ModelMetaGenerator implements Generator {
                     "throw new %1$s(\"The class(%2$s) is abstract.\");",
                     UnsupportedOperationException.class.getName(),
                     modelMetaDesc.getModelClassName());
-            } else {
-                printer.println("writer.println(\"var %s = {\");",
-                    modelMetaDesc.getSimpleName());
-                printer.println("writer.println(\"\\tdef: {\");");
-                fieldNum = 0;
-                for (AttributeMetaDesc attr : modelMetaDesc
-                    .getAttributeMetaDescList()) {
-                    if (attr.getReadMethodName() == null)
-                        continue;
-                    fieldNum++;
-                    JsonAnnotation ja = attr.getJson();
-                    if (ja.isIgnore())
-                        continue;
-                    DataType dataType = attr.getDataType();
-                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-                        continue;
-                    }
-                    name = ja.getAlias();
-                    if (name.length() == 0) {
-                        name = attr.getAttributeName();
-                    }
-                    dataType.accept(this, attr);
+                printer.unindent();
+                printer.println("}");
+                printer.println();
+                return;
+            }
+            printer.println("writer.println(\"var %s = {\");",
+                modelMetaDesc.getSimpleName());
+            printer.println("writer.println(\"\\tdef: {\");");
+            fieldNum = 0;
+            for (AttributeMetaDesc attr : modelMetaDesc
+                .getAttributeMetaDescList()) {
+                if (attr.getReadMethodName() == null)
+                    continue;
+                fieldNum++;
+                JsonAnnotation ja = attr.getJson();
+                if (ja.isIgnore())
+                    continue;
+                DataType dataType = attr.getDataType();
+                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+                    continue;
                 }
+                name = ja.getAlias();
+                if (name.length() == 0) {
+                    name = attr.getAttributeName();
+                }
+                dataType.accept(this, attr);
             }
             printer.println("writer.println(\"\\t},\");");
+            printer.println("writer.println(\"\\tcreateEmptyModel: function(){\");");
+            printer.println("writer.println(\"\\t\\tvar m = {};\");");
+            for (AttributeMetaDesc attr : modelMetaDesc
+                    .getAttributeMetaDescList()) {
+                if (attr.getReadMethodName() == null)
+                    continue;
+                JsonAnnotation ja = attr.getJson();
+                if (ja.isIgnore())
+                    continue;
+                DataType dataType = attr.getDataType();
+                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+                    continue;
+                }
+                String name = ja.getAlias();
+                if (name.length() == 0) {
+                    name = attr.getAttributeName();
+                }
+                printer.println("writer.println(\"\\t\\tm.%s = null;\");", name);
+            }
+            printer.println("writer.println(\"\\t\\treturn m;\");", name);
+            printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"\\treadModel: function(text){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(text, this.def);\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(text, this.def, this.createEmptyModel);\");");
             printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"\\treadModels: function(text){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(text, this.def);\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(text, this.def, this.createEmptyModel);\");");
             printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"};\");");
             printer.unindent();

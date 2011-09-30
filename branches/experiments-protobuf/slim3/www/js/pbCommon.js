@@ -37,8 +37,9 @@ var pbCommon = {
 		};
 	},
 	CodedInputStream: function(is){
-		this.mp2_4 = Math.pow(2, 4);
-		this.mp2_32 = Math.pow(2, 32);
+		this.mp_2_32 = Math.pow(2, 32);
+		this.mp_2_m149 = Math.pow(2, -149);
+		this.mp_2_m1074 = Math.pow(2, -1074);
 		this.is = is;
 		this.pushLimit = function(size){
 			this.is.pushLimit(size);
@@ -163,14 +164,18 @@ var pbCommon = {
 			var b2 = this.readRawByte();
 			var b3 = this.readRawByte();
 			var b4 = this.readRawByte();
+			if(b1 == null || b2 == null || b3 == null || b4 == null) return null;
 			var frac = b1 + (b2 << 8) + ((b3 & 0x7f) << 16);
 			var exp = (b3 >> 7) + ((b4 & 0x7f) << 1);
 			var sign = (b4 & 0x80) != 0 ? -1 : 1;
-			if(frac == 0 && exp == 0) return 0;
+			if(exp == 0){
+				if(frac == 0) return (sign == -1) ? -0 : 0;
+				return sign * frac * this.mp_2_m149;
+			}
 			if(exp === 0xff){
 				return frac != 0 ? NaN : (sign * Infinity);
 			}
-			return sign * (frac + 0x800000) * Math.pow(2, exp - 127 - 23);
+			return sign * (frac + 0x800000) * Math.pow(2, exp - 150);
 		};
 		this.readDouble = function(){
 			var b1 = this.readRawByte();
@@ -181,18 +186,24 @@ var pbCommon = {
 			var b6 = this.readRawByte();
 			var b7 = this.readRawByte();
 			var b8 = this.readRawByte();
+			if(b1 == null || b2 == null || b3 == null || b4 == null
+					|| b5 == null || b6 == null || b7 == null || b8 == null) return null;
 			var frac =
 				b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
-				((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * this.mp2_32);
-			var exp = 
+				((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * this.mp_2_32);
+			var exp =
 				((b7 & 0xf0) >> 4) +
 				((b8 & 0x7f) << 4);
 			var sign = (b8 & 0x80) != 0 ? -1 : 1;
-			if(frac == 0 && exp == 0) return 0;
+			if(exp == 0){
+				if(frac == 0) return (sign == 1) ? 0 : -0;
+				return sign * frac * this.mp_2_m1074;
+			}
 			if(exp === 0x7ff){
 				return frac != 0 ? NaN : (sign * Infinity);
 			}
-			return sign * (frac + 0x10000000000000) * Math.pow(2, exp - 1023 - 52);
+
+			return sign * (frac + 0x10000000000000) * Math.pow(2, exp - 1075);
 		};
 		this.readBool = function(){
 			r = this.readRawVarint32();
@@ -213,26 +224,26 @@ var pbCommon = {
 			return String.fromCharCode.apply(String, bytes);
 		};
 	},
-	doReadModel: function(cin, def){
-		var ret = {};
+	doReadModel: function(cin, def, factory){
+		var m = factory();
 		while(true){
 			var n = cin.readFieldNum();
 			if(n == null) break;
 			var d = def[n];
-			if(d != null) def[n](cin, ret);
+			if(d != null) def[n](cin, m);
 		}
-		return ret;
+		return m;
 	},
-	readModel: function(text, def){
+	readModel: function(text, def, factory){
 		var cin = new this.CodedInputStream(new this.TextInputStream(text));
-		return this.doReadModel(cin, def);
+		return this.doReadModel(cin, def, factory);
 	},
-	readModels: function(text, def){
+	readModels: function(text, def, factory){
 		var cin = new this.CodedInputStream(new this.TextInputStream(text));
 		var models = [];
 		while((size = cin.readRawVarint32()) != null){
 			cin.pushLimit(size);
-			var m = this.doReadModel(cin, def);
+			var m = this.doReadModel(cin, def, factory);
 			cin.popLimit();
 			if(m != null){
 				models.push(m);
@@ -241,4 +252,3 @@ var pbCommon = {
 		return models;
 	}
 };
-
