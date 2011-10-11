@@ -8,7 +8,7 @@
 <script type="text/javascript">
 <!--
 var req = new XMLHttpRequest();
-req.open('GET', "tests.bin", true);
+req.open('GET', "data/tests.bin", true);
 req.overrideMimeType('text/plain; charset=x-user-defined')
 req.onload = function() {
 	models = TestModelMeta.readModels(req.responseText);

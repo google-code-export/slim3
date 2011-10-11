@@ -14,6 +14,30 @@
  * governing permissions and limitations under the License.
  */
 var pbCommon = {
+	ByteArrayInputStream_read: function(){
+		if(this.index < this.limit){
+			return this.bytes[this.index++] & 0xff;
+		} else{
+			return null;
+		}
+	},
+	ByteArrayInputStream: function(bytes){
+		this.index = 0;
+		this.bytes = bytes;
+		this.limit = bytes.length;
+		this.limits = [];
+		this.read = pbCommon.ByteArrayInputStream_read;
+		this.pushLimit = function(size){
+			this.limits.push(this.limit);
+			this.limit = this.index + size;
+		};
+		this.popLimit = function(){
+			if(this.limits.length == 0) return null;
+			var ret = this.limit;
+			this.limit = this.limits.pop();
+			return ret;
+		};
+	},
 	TextInputStream: function(text){
 		index = 0;
 		limit = text.length;
@@ -37,52 +61,102 @@ var pbCommon = {
 		};
 	},
 	CodedInputStream: function(is){
+		this.mp_2_31 = Math.pow(2, 31);
 		this.mp_2_32 = Math.pow(2, 32);
+		this.mp_2_62 = Math.pow(2, 62);
 		this.mp_2_m149 = Math.pow(2, -149);
 		this.mp_2_m1074 = Math.pow(2, -1074);
 		this.is = is;
 		this.pushLimit = function(size){
 			this.is.pushLimit(size);
-		}
+		};
 		this.popLimit = function(){
 			this.is.popLimit();
-		}
+		};
 		this.readRawByte = function(){
 			return this.is.read();
-		}
+		};
 		this.readRawVarint32 = function(){
-			var tmp = this.readRawByte();
-			if(tmp == null) return null;
-			if(tmp >= 0) return tmp;
-			var result = tmp & 0x7f;
-			if((tmp = this.readRawByte()) >= 0) {
-				result |= tmp << 7;
-			} else {
-				result |= (tmp & 0x7f) << 7;
-				if ((tmp = this.readRawByte()) >= 0) {
-					result |= tmp << 14;
-				} else{
-					result |= (tmp & 0x7f) << 14;
-					if ((tmp = this.readRawByte()) >= 0) {
-						result |= tmp << 21;
-					} else {
-						result |= (tmp & 0x7f) << 21;
-						result |= (tmp = this.readRawByte()) << 28;
-						if (tmp < 0) {
-							// Discard upper 32 bits.
-							for ( i = 0; i < 5; i++) {
-								if (this.readRawByte() >= 0) {
-									return result;
-								}
-							}
-							throw Error("malformedVarint");
-						}
-					}
-				}
+			var b = this.readRawByte();
+			if(b == null) return null;
+			var v = b & 0x7f;
+			if((b & 0x80) == 0){
+				return v;
 			}
-			return result;
+			var shift = 7;
+			while(shift <= 21){
+				b = this.readRawByte();
+				if(b == null) return null;
+				v += (b & 0x7f) << shift;
+				if ((b & 0x80) == 0) {
+					return v;
+				}
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			v |= b << 28;
+			if((b & 0x80) != 0){
+				for(var i = 0; i < 5; i++){
+					if((this.readRawByte() & 0x80) == 0) return v;
+				}
+				throw Error("malformedVarint");
+			}
+			return v;
 		};
 		this.readRawVarint64 = function(){
+			var b = this.readRawByte();
+			if(b == null) return null;
+			var low31 = b & 0x7f;
+			if((b & 0x80) == 0){
+				return low31;
+			}
+			var shift = 7;
+			while(shift <= 21){
+				b = this.readRawByte();
+				if(b == null) return null;
+				low31 += (b & 0x7f) << shift;
+				if((b & 0x80) == 0) return low31;
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			low31 += (b & 0x07) << shift; // shift==28
+			var hi31 = (b & 0x78) >> 3;
+			if((b & 0x80) == 0){
+				return hi31 * this.mp_2_31 + low31;
+			}
+			shift = 4;
+			while(shift <= 18){
+				b = this.readRawByte();
+				if(b == null) return null;
+				hi31 += (b & 0x7f) << shift;
+				if((b & 0x80) == 0){
+					return hi31 * this.mp_2_31 + low31;
+				}
+				shift += 7;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			hi31 += (b & 0x3f) << shift; // shift==25
+			var ex = (b & 0x40) >> 6;
+			if((b & 0x80) == 0){
+				return ex * this.mp_2_62 + hi31 * this.mp_2_31 + low31;
+			}
+			b = this.readRawByte();
+			if(b == null) return null;
+			if((b & 0x80) != 0){
+				throw Error("malformedVarint");						
+			}
+			// negative
+			var v = ex * Math.pow(2, 62) + hi31 * Math.pow(2, 31) + low31;
+			if(hi31 == 0x7fffffff && ex == 1){
+				return low31 | 0x80000000;
+			}
+			return -4294967296 + low31 +
+				(hi31 * Math.pow(2, 31) + ex * Math.pow(2, 62) -9223372032559808512);
+		};
+		this.readRawVarint642 = function(){
 			var b = this.readRawByte();
 			if(b == null) return null;
 			var lowInt = b & 0x7f;
@@ -188,12 +262,9 @@ var pbCommon = {
 			var b8 = this.readRawByte();
 			if(b1 == null || b2 == null || b3 == null || b4 == null
 					|| b5 == null || b6 == null || b7 == null || b8 == null) return null;
-			var frac =
-				b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
+			var frac = b1 + (b2 << 8) + (b3 << 16) + ((b4 << 24) >>> 0) +
 				((b5 + (b6 << 8) + ((b7 & 0x0f) << 16)) * this.mp_2_32);
-			var exp =
-				((b7 & 0xf0) >> 4) +
-				((b8 & 0x7f) << 4);
+			var exp = ((b7 & 0xf0) >> 4) + ((b8 & 0x7f) << 4);
 			var sign = (b8 & 0x80) != 0 ? -1 : 1;
 			if(exp == 0){
 				if(frac == 0) return (sign == 1) ? 0 : -0;
@@ -211,17 +282,33 @@ var pbCommon = {
 			return r != 0;
 		};
 		this.readString = function(){
+			// 
 			var size = this.readRawVarint32();
 			if(size == null) return;
-			var bytes = [];
+			var str = "";
 			for(i = 0; i < size; i++){
-				v = this.readRawByte();
-				if(v == null){
-					break;
-				}
-				bytes.push(v);
+				c = this.readRawByte();
+				if(c == null) break;
+				if(c <= 0x7f) {
+					str += String.fromCharCode(c);
+				} else if((0x60 <= c) && (c < 224)) {
+					c2 = this.readRawByte();
+					size--;
+					if(c2 == null) break;
+					str += String.fromCharCode(
+							((c & 0x1f) << 6) | (c2 & 63)
+							);
+				} else {
+					c2 = this.readRawByte();
+					size--;
+					if(c == null) break;
+					c3 = this.readRawByte();
+					size--;
+					if(c == null) break;
+					str += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+	 			}
 			}
-			return String.fromCharCode.apply(String, bytes);
+			return str;
 		};
 	},
 	doReadModel: function(cin, def, factory){

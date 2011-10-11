@@ -9,7 +9,7 @@ import com.google.appengine.api.datastore.Key;
 public class FloatModel {
     public static FloatModel createModel(){
         FloatModel m = new FloatModel();
-        m.setFloatValue(10.0f);
+        m.setPositive(10.0f);
         m.setNegativeFloatValue(-10.0f);
         return m;
     }
@@ -19,11 +19,11 @@ public class FloatModel {
     public void setKey(Key key) {
         this.key = key;
     }
-    public float getFloatValue() {
-        return floatValue;
+    public float getPositive() {
+        return positive;
     }
-    public void setFloatValue(float floatValue) {
-        this.floatValue = floatValue;
+    public void setPositive(float floatValue) {
+        this.positive = floatValue;
     }
     public float getInfinityValue() {
         return infinityValue;
@@ -75,7 +75,7 @@ public class FloatModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private float floatValue;
+    private float positive;
     private float negativeFloatValue;
     private float maxValue = Float.MAX_VALUE;
     private float minValue = Float.MIN_VALUE;

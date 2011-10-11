@@ -9,7 +9,7 @@ import com.google.appengine.api.datastore.Key;
 public class StringModel {
     public static StringModel createModel(){
         StringModel m = new StringModel();
-        m.setStringValue("hello");
+        m.setHello("hello");
         return m;
     }
     public Key getKey() {
@@ -18,13 +18,27 @@ public class StringModel {
     public void setKey(Key key) {
         this.key = key;
     }
-    public String getStringValue() {
-        return stringValue;
+    public String getHello() {
+        return hello;
     }
-    public void setStringValue(String stringValue) {
-        this.stringValue = stringValue;
+    public void setHello(String stringValue) {
+        this.hello = stringValue;
+    }
+    public String getJapanese() {
+        return japanese;
+    }
+    public void setJapanese(String japanese) {
+        this.japanese = japanese;
+    }
+    public String getSurrogate() {
+        return surrogate;
+    }
+    public void setSurrogate(String surrogate) {
+        this.surrogate = surrogate;
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private String stringValue;
+    private String hello;
+    private String japanese;
+    private String surrogate;
 }

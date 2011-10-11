@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+</head>
+<body>
+from hard-coded bytes:
+<table id="hardcodedPb" border="1" cellpadding="4">
+<tr><th>status</th><th>name</th><th>expected</th><th>actual</th></tr>
+</table>
+
+<script type="text/javascript">
+<!--
+function appendResult(id, name, expected, actual){
+	document.getElementById(id).innerHTML += "<tr>" +
+		"<td bgcolor=\"" + ((expected == actual) ? "#00ff00\">OK!" : "#ff0000\">NG!") + "</td>" +
+		"<td>" + name + "</td>" +
+		"<td>" + expected + "</td>" +
+		"<td>" + actual + "</td></tr>";
+}
+function toCI(){
+	return new pbCommon.CodedInputStream(
+			new pbCommon.ByteArrayInputStream(arguments)
+			);
+}
+appendResult("hardcodedPb", "value"
+		, 4, toCI(4).readInt32());
+appendResult("hardcodedPb", "value_max"
+		, 2147483647, toCI(0xff, 0xff, 0xff, 0xff, 0x07).readInt32());
+appendResult("hardcodedPb", "value_min"
+		, -2147483648, toCI(0x80, 0x80, 0x80, 0x80, 0x08).readInt32());
+// -->
+</script>
+</body>
+</html>
