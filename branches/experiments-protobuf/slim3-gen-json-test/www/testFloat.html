@@ -22,7 +22,7 @@
 <script type="text/javascript">
 <!--
 var req = new XMLHttpRequest();
-req.open('GET', "float.bin", true);
+req.open('GET', "data/float.bin", true);
 req.overrideMimeType('text/plain; charset=x-user-defined')
 req.onload = function() {
 	model = FloatModelMeta.readModel(req.responseText);

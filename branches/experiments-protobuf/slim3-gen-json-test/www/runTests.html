@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<script type="text/javascript" src="js/pbCommon.js"></script>
+<script type="text/javascript" src="js/pbStringModelMeta.js"></script>
+<script type="text/javascript" src="js/pbIntModelMeta.js"></script>
+<script type="text/javascript" src="js/pbLongModelMeta.js"></script>
+<script type="text/javascript" src="js/pbFloatModelMeta.js"></script>
+<script type="text/javascript" src="js/pbDoubleModelMeta.js"></script>
+<script type="text/javascript" src="js/testCommon.js"></script>
+<script type="text/javascript" src="js/testStringModel.js"></script>
+<script type="text/javascript" src="js/testIntModel.js"></script>
+<script type="text/javascript" src="js/testLongModel.js"></script>
+<script type="text/javascript" src="js/testFloatModel.js"></script>
+<script type="text/javascript" src="js/testDoubleModel.js"></script>
+</head>
+<body>
+test results:
+<table id="results" border="1" cellpadding="4">
+</table>
+
+<script type="text/javascript">
+<!--
+for(var i = 0; i < tests.length; i++){
+	var t = tests[i];
+	var req = new XMLHttpRequest();
+	req.open('GET', t.path, true);
+	req.overrideMimeType('text/plain; charset=x-user-defined')
+	req.onload = t.onload;
+	req.send();
+}
+// -->
+</script>
+</body>
+</html>
