@@ -3,7 +3,7 @@ tests.push({
 	onload: function(){
 		var model = FloatModelMeta.readModel(this.responseText);
 		appendTitle("FloatModel");
-		appendResult("floatValue", "3.230540819679854e+24", model.floatValue);
+		appendResult("positive", "3443.822265625", model.positive);
 		appendResult("infinityValue", "Infinity", model.infinityValue);
 		appendResult("maxValue", "3.4028234663852886e+38", model.maxValue);
 		appendResult("minNormalValue", "1.1754943508222875e-38", model.minNormalValue);

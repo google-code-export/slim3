@@ -44,8 +44,8 @@ public class IntModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private int positive;
-    private int negative;
+    private int positive = 1 << 20;
+    private int negative = -12924443;
     private int max = Integer.MAX_VALUE;
     private int min = Integer.MIN_VALUE;
 }

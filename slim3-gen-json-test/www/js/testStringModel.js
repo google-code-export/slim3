@@ -3,8 +3,10 @@ tests.push({
 	onload: function(){
 		var model = StringModelMeta.readModel(this.responseText);
 		appendTitle("StringModel");
-		appendResult("hello", "hello", model.hello);
-		appendResult("japanese", "こんにちは", model.japanese);
+		appendResult("hello", "Hello, World.", model.hello);
 		appendResult("surrogate", "叱", model.surrogate);
+		appendResult("japanese", "お早うございます。行ってらっしゃい。", model.japanese);
+		appendResult("japanese_hiragana", "あいうえおかきくけこわおん", model.japanese_hiragana);
+		appendResult("japanese_katakana", "アイウエオカキクケコヤユヨ", model.japanese_katakana);
 	}
 });
