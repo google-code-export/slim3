@@ -74,8 +74,8 @@ public class DoubleModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private double doubleValue;
-    private double negativeDoubleValue;
+    private double doubleValue = 0x00ffffffffffffffL;
+    private double negativeDoubleValue = -233323.4333584;
     private double maxValue = Double.MAX_VALUE;
     private double minValue = Double.MIN_VALUE;
     private double minM2Value = Double.MIN_VALUE + Double.MIN_VALUE;

@@ -3,9 +3,9 @@ tests.push({
 	onload: function(){
 		var model = LongModelMeta.readModel(this.responseText);
 		appendTitle("LongModel");
+		appendResult("max", "9223372036854775807", model.max);
 		appendResult("positive", "32342423444", model.positive);
 		appendResult("negative", "-23948821142", model.negative);
-		appendResult("max", "9223372036854775807", model.max);
 		appendResult("min", "-9223372036854775808", model.min);
 		appendResult("minus1", "-1", model.minus1);
 		appendResult("v2p52", "4503599627370496", model.v2p52);

@@ -75,8 +75,8 @@ public class FloatModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private float positive;
-    private float negativeFloatValue;
+    private float positive = 3443.8223f;
+    private float negativeFloatValue = -233323.4333584f;
     private float maxValue = Float.MAX_VALUE;
     private float minValue = Float.MIN_VALUE;
     private float minP1Value = Float.MIN_VALUE + Float.MIN_VALUE;

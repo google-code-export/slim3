@@ -92,13 +92,13 @@ public class LongModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private long positive;
-    private long negative;
+    private long positive = 32342423444L;
+    private long negative = -23948821142L;
     private long minusB20 = 0xfffffffffff03466L; // -9223372036853727233
     private long minusB36 = 0xfffffffe2f67a44dL; // -9223371968135299073
-    private long v2p52;
-    private long v2p53;
-    private long v2p54;
+    private long v2p52 = 1L << 52;
+    private long v2p53 = 1L << 53;
+    private long v2p54 = 1L << 54;
     private long minus1 = -1;
     private long max = Long.MAX_VALUE;
     private long min = Long.MIN_VALUE;
