@@ -31,10 +31,10 @@ var LongModelMeta = {
 		m.v2p54 = null;
 		return m;
 	},
-	readModel: function(text){
-		return pbCommon.readModel(text, this.def, this.createEmptyModel);
+	readModel: function(input){
+		return pbCommon.readModel(input, this.def, this.createEmptyModel);
 	},
-	readModels: function(text){
-		return pbCommon.readModels(text, this.def, this.createEmptyModel);
+	readModels: function(input){
+		return pbCommon.readModels(input, this.def, this.createEmptyModel);
 	},
 };

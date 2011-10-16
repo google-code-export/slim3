@@ -40,7 +40,10 @@ var pbCommon = {
 		return m;
 	},
 	readModel: function(text, def, factory){
-		var cin = new this.CodedInputStream(new this.TextInputStream(text));
+		var cin = text;
+		if(typeof(text) == "string"){
+			cin = new this.CodedInputStream(new this.TextInputStream(text));
+		}
 		return this.doReadModel(cin, def, factory);
 	},
 	readModels: function(text, def, factory){

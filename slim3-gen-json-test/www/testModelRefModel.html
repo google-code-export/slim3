@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<script type="text/javascript" src="js/pbCommon.js"></script>
+<script type="text/javascript" src="js/pbModelRefModelMeta.js"></script>
+<script type="text/javascript" src="js/testCommon.js"></script>
+</head>
+<body>
+test results:
+<table id="results" border="1" cellpadding="4">
+</table>
+
+<script type="text/javascript">
+<!--
+function addRow(text){
+	document.getElementById("results").innerHTML += "<tr>" +
+	"<td>" + text + "</td></tr>";
+}
+var req = new XMLHttpRequest();
+req.open('GET', "data/ModelRefModel.bin", true);
+req.overrideMimeType('text/plain; charset=x-user-defined')
+req.onload = function(){
+	var model = ModelRefModelMeta.readModel(this.responseText);
+	for(v in model){
+		if(v == "modelRefValue"){
+			var s = v + ": {<br>";
+			for(v2 in model[v]){
+				s += "&nbsp;" + v2 + ": " + model[v][v2] + "<br>";
+			}
+			addRow(s + "}");
+		} else{
+			addRow(v + ": " + model[v]);
+		}
+	}
+	addRow(model.intValue);
+	addRow(model.modelRefValue.intValue);
+};
+req.send();
+// -->
+</script>
+</body>
+</html>
