@@ -2,6 +2,8 @@ package org.slim3.json.test.issue_protobuf;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Stack;
 
 import org.junit.Assert;
@@ -31,6 +33,7 @@ public class ModelRefModelTest extends AppEngineTestCase {
         int fieldNum = cis.readTag() >> 3;
         int nest = 0;
         int intValues = 0, keyValues = 0;
+        String[] keys = new String[2];
         Stack<Integer> limits = new Stack<Integer>();
         while(fieldNum > 0 || nest > 0){
             if(fieldNum == 1){
@@ -42,6 +45,7 @@ public class ModelRefModelTest extends AppEngineTestCase {
                     key = child.getKey();
                 }
                 Assert.assertEquals(Datastore.keyToString(key), cis.readString());
+                keys[keyValues] = Datastore.keyToString(key);
                 keyValues++;
             } else if(fieldNum == 3){
                 nest++;
@@ -55,5 +59,37 @@ public class ModelRefModelTest extends AppEngineTestCase {
         }
         Assert.assertEquals(2, intValues);
         Assert.assertEquals(2, keyValues);
+        System.out.println(keys[0]);
+        System.out.println(keys[1]);
+    }
+    
+    @Test
+    public void genJs() throws Exception{
+        String name = "ModelRefModel";
+        ModelRefModelMeta meta = ModelRefModelMeta.get();
+        PrintWriter w = new PrintWriter("www/js/pb" + name + "Meta.js", "UTF-8");
+        try{
+            meta.writePbJs(w);
+        } finally{
+            w.close();
+        }        
+    }
+
+    @Test
+    public void genPb() throws Exception{
+        ModelRefModelMeta meta = ModelRefModelMeta.get();
+        ModelRefModel m = new ModelRefModel();
+        m.setIntValue(100);
+        ModelRefModel child = new ModelRefModel();
+        child.setIntValue(1000);
+        m.getModelRefValue().setModel(child);
+        Datastore.put(m, child);
+
+        FileOutputStream fos = new FileOutputStream("www/data/ModelRefModel.bin");
+        try{
+            meta.modelToPb(m, fos, 2);
+        } finally{
+            fos.close();
+        }
     }
 }

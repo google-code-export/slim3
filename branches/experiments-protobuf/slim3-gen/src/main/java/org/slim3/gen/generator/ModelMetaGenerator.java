@@ -2854,57 +2854,6 @@ public class ModelMetaGenerator implements Generator {
         }
     }
 
-    protected static class PbTypeVisitor{
-        Void defaultAction(){return null;}
-        Void visitBooleanType(){return null;}
-        Void visitEnumType(){return null;}
-        Void visitInt32Type(){return null;}
-        Void visitInt64Type(){return null;}
-        Void visitStringType(){return null;}
-        Void visitFloatType(){return null;}
-        Void visitDoubleType(){return null;}
-        Void visitCollectionType(){return null;}
-        Void visitArrayType(){return null;}
-        Void visitBlobType(){return null;}
-        Void visitTextType(){return null;}
-        Void visitKeyType(){return null;}
-    }
-    protected class PbVisitorAdapter extends
-        SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException>{
-        /**
-         * 
-         */
-        public PbVisitorAdapter(PbTypeVisitor visitor) {
-            this.visitor = visitor;
-        }
-        private PbTypeVisitor visitor;
-        @Override
-        protected Void defaultAction(DataType type, AttributeMetaDesc p)
-                throws RuntimeException {
-            return visitor.defaultAction();
-        }
-        @Override
-        public Void visitCollectionType(CollectionType type, AttributeMetaDesc p)
-                throws RuntimeException {
-            return visitor.visitCollectionType();
-        }
-        @Override
-        public Void visitArrayType(ArrayType type, AttributeMetaDesc p)
-                throws RuntimeException {
-            return visitor.visitArrayType();
-        }
-        @Override
-        public Void visitPrimitiveBooleanType(PrimitiveBooleanType type,
-                AttributeMetaDesc p) throws RuntimeException {
-            return visitor.visitBooleanType();
-        }
-        @Override
-        public Void visitBooleanType(BooleanType type, AttributeMetaDesc p)
-                throws RuntimeException {
-            return visitor.visitBooleanType();
-        }
-    }
-
     /**
      * The method generator for modelToPb method.
      * 
@@ -3397,11 +3346,11 @@ public class ModelMetaGenerator implements Generator {
             }
             printer.println("writer.println(\"\\t\\treturn m;\");", name);
             printer.println("writer.println(\"\\t},\");");
-            printer.println("writer.println(\"\\treadModel: function(text){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(text, this.def, this.createEmptyModel);\");");
+            printer.println("writer.println(\"\\treadModel: function(input){\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(input, this.def, this.createEmptyModel);\");");
             printer.println("writer.println(\"\\t},\");");
-            printer.println("writer.println(\"\\treadModels: function(text){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(text, this.def, this.createEmptyModel);\");");
+            printer.println("writer.println(\"\\treadModels: function(input){\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(input, this.def, this.createEmptyModel);\");");
             printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"};\");");
             printer.unindent();
@@ -3418,6 +3367,22 @@ public class ModelMetaGenerator implements Generator {
                         "v.%s = cin.%s();},\");"
                         , fieldNum, name, m);
             }
+            return null;
+        }
+        
+        @Override
+        public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            String cn = type.getReferenceModelTypeName();
+            cn = cn.substring(cn.lastIndexOf('.') + 1);
+            printer.println("writer.println(\"\\t\\t%d: function(cin, v){\");"
+                    , fieldNum);
+            printer.println("writer.println(\"\\t\\t\\tvar size = cin.readRawVarint32();\");");
+            printer.println("writer.println(\"\\t\\t\\tcin.pushLimit(size);\");");
+            printer.println("writer.println(\"\\t\\t\\tv.%s = %sMeta.readModel(cin);\");"
+                , name, cn.replaceAll("\\.", "_"));
+            printer.println("writer.println(\"\\t\\t\\tcin.popLimit();\");");
+            printer.println("writer.println(\"\\t\\t},\");");
             return null;
         }
 
