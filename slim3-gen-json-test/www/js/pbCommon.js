@@ -66,11 +66,11 @@ pbCommon.ByteArrayInputStream.read = function(){
 	} else{
 		return null;
 	}
-},
+};
 pbCommon.ByteArrayInputStream.pushLimit = function(size){
 	this.limits.push(this.limit);
 	this.limit = this.index + size;
-},
+};
 pbCommon.ByteArrayInputStream.popLimit = function(){
 	if(this.limits.length == 0) return null;
 	var ret = this.limit;
@@ -259,21 +259,41 @@ pbCommon.CodedInputStream.prototype.readString = function(){
 	if(size == null) return null;
 	var str = "";
 	for(i = 0; i < size; i++){
-		c = this.readRawByte();
+		var c = this.readRawByte();
 		if(c <= 0x7f) {
 			str += String.fromCharCode(c);
-		} else if((0x60 <= c) && (c < 224)) {
-			c2 = this.readRawByte();
+		} else if((c & 0xe0) == 0xc0){
+			if((i + 1) == size) break;
+			var c2 = this.readRawByte();
 			size--;
 			str += String.fromCharCode(
-					((c & 0x1f) << 6) | (c2 & 63)
+					((c & 0x1f) << 6) + (c2 & 0x3f)
 					);
-		} else {
-			c2 = this.readRawByte();
+		} else if((c & 0xf0) == 0xe0){
+			if((i + 1) == size) break;
+			var c2 = this.readRawByte();
 			size--;
-			c3 = this.readRawByte();
+			if((i + 1) == size) break;
+			var c3 = this.readRawByte();
 			size--;
-			str += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+			str += String.fromCharCode(
+					((c & 0x0f) << 12) + ((c2 & 0x3f) << 6) + (c3 & 0x3f)
+					);
+		} else if((c & 0xf8) == 0xf0){
+			// surrogate
+			if((i + 1) == size) break;
+			var c2 = this.readRawByte();
+			size--;
+			if((i + 1) == size) break;
+			var c3 = this.readRawByte();
+			size--;
+			if((i + 1) == size) break;
+			var c4 = this.readRawByte();
+			size--;
+			var code = ((c & 0x3) << 18) + ((c2 & 0x3f) << 12) +
+				((c3 & 0x3f) << 6) + (c4 & 0x3f) - 0x10000;
+			str += String.fromCharCode((code / 0x400) + 0xD800) +
+				String.fromCharCode((code % 0x400) + 0xDC00);
 		}
 	}
 	return str;

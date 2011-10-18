@@ -48,10 +48,14 @@ public class TestJsGenerator {
                             }
                             b.append(")");
                             w.println(String.format(fmt, propertyName, b));
-                        } else if(expected instanceof Float){
+                        } else if(
+                                (expected instanceof Float)
+                                || (expected instanceof Double)){
                             w.println(String.format(fmt, propertyName, String.format(
-                                "\"%1.20g", expected).replaceAll("0+e", "e")
-                                        .replaceAll("0+$", "") + "\""));
+                                "%1.20g", expected).replaceAll("0+e", "e")
+                                        .replaceAll("0+$", "")));
+                        } else if(expected instanceof Number){
+                            w.println(String.format(fmt, propertyName, expected));
                         } else{
                             w.println(String.format(fmt, propertyName, "\"" + expected + "\""));
                         }

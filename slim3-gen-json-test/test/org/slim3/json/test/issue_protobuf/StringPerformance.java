@@ -4,20 +4,24 @@ import java.io.ByteArrayOutputStream;
 
 public class StringPerformance {
     public static void main(String[] args) throws Exception{
+        for(char c : new StringModel().getSurrogate().toCharArray()){
+            System.out.print(String.format("%02x,", (int)c));
+        }
+        System.out.println();
         System.out.println(StringModelMeta.get()
-            .modelToJson(StringModel.createModel()));
-        speed(1);
-        speed(1000);
-        speed(10000);
-        speed(50000);
-        size();
+            .modelToJson(new StringModel()));
+//        speed(1);
+//        speed(1000);
+//        speed(10000);
+//        speed(50000);
+//        size();
     }
 
     public static void speed(int n) throws Exception{
         StringModelMeta meta = StringModelMeta.get();
         StringModel[] models = new StringModel[100];
         for(int i = 0; i < 100; i++){
-            models[i] = StringModel.createModel();
+            models[i] = new StringModel();
         }
         {
             long s = System.currentTimeMillis();
@@ -45,7 +49,7 @@ public class StringPerformance {
         StringModelMeta meta = StringModelMeta.get();
         StringModel[] models = new StringModel[100];
         for(int i = 0; i < 100; i++){
-            models[i] = StringModel.createModel();
+            models[i] = new StringModel();
         }
         {
             long sum = 0;
