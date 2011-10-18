@@ -13,7 +13,8 @@ function appendResult(name, expected, actual){
 				if(!equals) break;
 			}
 		}
-	} else if(isNaN(expected) && isNaN(actual)){
+	} else if(typeof(expected) == "number" && typeof(actual) == "number" &&
+			isNaN(expected) && isNaN(actual)){
 		equals = true;
 	}
 	document.getElementById("results").innerHTML += "<tr>" +

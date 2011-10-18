@@ -4,7 +4,7 @@ tests.push({
 		var model = StringModelMeta.readModel(this.responseText);
 		appendTitle("StringModel");
 		appendResult("hello", "Hello, World.", model.hello);
-		appendResult("surrogate", "叱", model.surrogate);
+		appendResult("surrogate", "surro-𝄢-gate", model.surrogate);
 		appendResult("japanese", "お早うございます。行ってらっしゃい。", model.japanese);
 		appendResult("japanese_hiragana", "あいうえおかきくけこわおん", model.japanese_hiragana);
 		appendResult("japanese_katakana", "アイウエオカキクケコヤユヨ", model.japanese_katakana);

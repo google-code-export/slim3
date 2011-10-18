@@ -7,11 +7,6 @@ import com.google.appengine.api.datastore.Key;
 
 @Model
 public class StringModel {
-    public static StringModel createModel(){
-        StringModel m = new StringModel();
-        m.setHello("hello");
-        return m;
-    }
     public Key getKey() {
         return key;
     }
@@ -55,5 +50,5 @@ public class StringModel {
     private String japanese = "お早うございます。行ってらっしゃい。";
     private String japanese_hiragana = "あいうえおかきくけこわおん";
     private String japanese_katakana = "アイウエオカキクケコヤユヨ";
-    private String surrogate = "叱";
+    private String surrogate = "surro-\uD834\uDD22-gate";
 }
