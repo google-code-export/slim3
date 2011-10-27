@@ -23,4 +23,11 @@ function appendResult(name, expected, actual){
 		"<td>" + expected + "</td>" +
 		"<td>" + actual + "</td></tr>";
 }
+function longToHexString(v){
+	var s = (((v / Math.pow(2, 32)) & 0xffffffff) >>> 0).toString(16);
+	var str = "00000000".slice(s.length, 8) + s;
+	s = ((v & 0xffffffff) >>> 0).toString(16);
+	str += "00000000".slice(s.length, 8) + s;
+	return "0x" + str;
+}
 tests = new Array();

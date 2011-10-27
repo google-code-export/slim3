@@ -1,18 +1,78 @@
 var LongModelMeta = {
 	def: {
-		1: function(cin, v){ v.almostMin1 = cin.readInt64();},
-		2: function(cin, v){ v.almostMin2 = cin.readInt64();},
-		3: function(cin, v){ v.key = cin.readString();},
-		4: function(cin, v){ v.max = cin.readInt64();},
-		5: function(cin, v){ v.min = cin.readInt64();},
-		6: function(cin, v){ v.minus1 = cin.readInt64();},
-		7: function(cin, v){ v.minusB20 = cin.readInt64();},
-		8: function(cin, v){ v.minusB36 = cin.readInt64();},
-		9: function(cin, v){ v.negative = cin.readInt64();},
-		10: function(cin, v){ v.positive = cin.readInt64();},
-		11: function(cin, v){ v.v2p52 = cin.readInt64();},
-		12: function(cin, v){ v.v2p53 = cin.readInt64();},
-		13: function(cin, v){ v.v2p54 = cin.readInt64();},
+		1: function(cin, m){
+			var v = cin.readInt64();
+			m.almostMin1 = v.value;
+			m.almostMin1_hi32 = v.hi32;
+			m.almostMin1_low32 = v.low32;
+		},
+		2: function(cin, m){
+			var v = cin.readInt64();
+			m.almostMin2 = v.value;
+			m.almostMin2_hi32 = v.hi32;
+			m.almostMin2_low32 = v.low32;
+		},
+		3: function(cin, m){ m.key = cin.readString();},
+		4: function(cin, m){
+			var v = cin.readInt64();
+			m.max = v.value;
+			m.max_hi32 = v.hi32;
+			m.max_low32 = v.low32;
+		},
+		5: function(cin, m){
+			var v = cin.readInt64();
+			m.min = v.value;
+			m.min_hi32 = v.hi32;
+			m.min_low32 = v.low32;
+		},
+		6: function(cin, m){
+			var v = cin.readInt64();
+			m.minus1 = v.value;
+			m.minus1_hi32 = v.hi32;
+			m.minus1_low32 = v.low32;
+		},
+		7: function(cin, m){
+			var v = cin.readInt64();
+			m.minusB20 = v.value;
+			m.minusB20_hi32 = v.hi32;
+			m.minusB20_low32 = v.low32;
+		},
+		8: function(cin, m){
+			var v = cin.readInt64();
+			m.minusB36 = v.value;
+			m.minusB36_hi32 = v.hi32;
+			m.minusB36_low32 = v.low32;
+		},
+		9: function(cin, m){
+			var v = cin.readInt64();
+			m.negative = v.value;
+			m.negative_hi32 = v.hi32;
+			m.negative_low32 = v.low32;
+		},
+		10: function(cin, m){
+			var v = cin.readInt64();
+			m.positive = v.value;
+			m.positive_hi32 = v.hi32;
+			m.positive_low32 = v.low32;
+		},
+		11: function(cin, m){
+			var v = cin.readInt64();
+			m.v2p52 = v.value;
+			m.v2p52_hi32 = v.hi32;
+			m.v2p52_low32 = v.low32;
+		},
+		12: function(cin, m){
+			var v = cin.readInt64();
+			m.v2p53 = v.value;
+			m.v2p53_hi32 = v.hi32;
+			m.v2p53_low32 = v.low32;
+		},
+		13: function(cin, m){
+			var v = cin.readInt64();
+			m.v2p54 = v.value;
+			m.v2p54_hi32 = v.hi32;
+			m.v2p54_low32 = v.low32;
+		},
 	},
 	createEmptyModel: function(){
 		var m = {};

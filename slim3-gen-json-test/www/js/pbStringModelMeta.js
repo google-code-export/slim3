@@ -1,11 +1,11 @@
 var StringModelMeta = {
 	def: {
-		1: function(cin, v){ v.hello = cin.readString();},
-		2: function(cin, v){ v.japanese = cin.readString();},
-		3: function(cin, v){ v.japanese_hiragana = cin.readString();},
-		4: function(cin, v){ v.japanese_katakana = cin.readString();},
-		5: function(cin, v){ v.key = cin.readString();},
-		6: function(cin, v){ v.surrogate = cin.readString();},
+		1: function(cin, m){ m.hello = cin.readString();},
+		2: function(cin, m){ m.japanese = cin.readString();},
+		3: function(cin, m){ m.japanese_hiragana = cin.readString();},
+		4: function(cin, m){ m.japanese_katakana = cin.readString();},
+		5: function(cin, m){ m.key = cin.readString();},
+		6: function(cin, m){ m.surrogate = cin.readString();},
 	},
 	createEmptyModel: function(){
 		var m = {};

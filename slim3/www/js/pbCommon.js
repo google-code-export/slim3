@@ -138,27 +138,47 @@ pbCommon.CodedInputStream.prototype.readRawVarint64 = function(){
 	if(b == null) return null;
 	var low32 = b & 0x7f;
 	if((b & 0x80) == 0){
-		return low32;
+		return {
+			value: low32,
+			hi32: 0,
+			low32: low32
+		};
 	}
 	var shift = 7;
 	while(shift <= 21){
 		b = this.readRawByte();
 		low32 += (b & 0x7f) << shift;
-		if((b & 0x80) == 0) return low32;
+		if((b & 0x80) == 0){
+			return {
+				value: low32,
+				hi32: 0,
+				low32: low32
+			};
+		}
 		shift += 7;
 	}
 	b = this.readRawByte();
 	low32 += (b & 0x0f) * this.mp_2_28; // shift==28
 	var hi31 = (b & 0x70) >> 4;
 	if((b & 0x80) == 0){
-		return hi31 * this.mp_2_32 + low32;
+		hi31 *= this.mp_2_32;
+		return {
+			value: hi31 + low32,
+			hi32: hi31,
+			low32: low32
+		};
 	}
 	shift = 3;
 	while(shift <= 24){
 		b = this.readRawByte();
 		hi31 += (b & 0x7f) << shift;
 		if((b & 0x80) == 0){
-			return hi31 * this.mp_2_32 + low32;
+			hi31 *= this.mp_2_32;
+			return {
+				value: hi31 + low32,
+				hi32: hi31,
+				low32: low32
+			};
 		}
 		shift += 7;
 	}
@@ -167,8 +187,12 @@ pbCommon.CodedInputStream.prototype.readRawVarint64 = function(){
 		throw Error("malformedVarint");						
 	}
 	// negative
-	return -4294967296 + low32 +
-		(hi31 * this.mp_2_32 - 9223372032559808512);
+	hi31 = (hi31 | 0x80000000) * this.mp_2_32;
+	return {
+		value: hi31 + low32,
+		hi32: hi31,
+		low32: low32
+	};
 };
 pbCommon.CodedInputStream.prototype.readRawLittleEndian32 = function(){
 	var b1 = this.readRawByte();

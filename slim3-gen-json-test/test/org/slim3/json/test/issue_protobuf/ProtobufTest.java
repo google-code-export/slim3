@@ -90,7 +90,7 @@ public class ProtobufTest extends AppEngineTestCase{
     public void writePbJs() throws Exception{
         PrintWriter w = new PrintWriter(new FileOutputStream("pbTestModelMeta.js"));
         try{
-            TestModelMeta.get().writePbJs(w);
+            TestModelMeta.get().writePbModelMetaJs(w);
         } finally{
             w.close();
         }

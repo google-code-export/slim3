@@ -21,11 +21,12 @@ public class LongModelTest extends AppEngineTestCase {
     
     @Test
     public void test2() throws Exception{
-        long value = (2147483647 << 32) + 9223372036854775807L;
+        long value = (2147483647L << 32) + 9223372036854775807L;
         System.out.println(value);
         System.out.println(Long.MAX_VALUE);
         System.out.println(Long.MAX_VALUE & 0xffffffffL);
         System.out.println(Long.MAX_VALUE & 0xffff);
+        System.out.println((long)Math.pow(2, 32));
         for(int i = 53; i < 63; i++){
             StringBuilder b = new StringBuilder();
             b.append("this.positiveBignums[")
@@ -245,8 +246,101 @@ public class LongModelTest extends AppEngineTestCase {
         printBits((double)-4294967295L);
         printBits(-9223372032559808512L);
         printBits((double)-9223372032559808512L);
+        printBits(Double.MAX_VALUE);
+        System.out.println(String.format("%20.20f", Math.pow(2, 63)));
+    }
+
+    @Test
+    public void test16(){
+        printBits(Long.MIN_VALUE);
+        System.out.println("-9223372036854776000");
+        printBits(-9223372032559809000L);
+        printBits(-4294967296L);
+        printBits(-9223372032559809000L + -4294967296L);
+        System.out.println("-- min --");
+        System.out.println("expected: -9223372036854775808: 1000000000000000000000000000000000000000000000000000000000000000");
+        System.out.println("expected_hi32: -9223372036854775808: 1000000000000000000000000000000000000000000000000000000000000000");
+        System.out.println("expected_low32: 0: 0000000000000000000000000000000000000000000000000000000000000000");
+        System.out.println("expected_sum: -9223372036854775808: 1000000000000000000000000000000000000000000000000000000000000000");
+        System.out.println("true");
     }
     
+    @Test
+    public void test17(){
+        long v = Long.MIN_VALUE;
+        int vl = (int)(v & 0xffffffffL);
+        long vh = v & 0x7fffffff00000000L;
+        long vl2 = vl - 4294967296L; // 296
+        long vh2 = vh - 9223372032559808512L; // 12
+        double vl3 = vl2;
+        double vh3 = vh2;
+        printBits(4294967296L);
+        printBits(-4294967296L);
+        printBits(9223372032559808512L);
+        printBits(-9223372032559808512L);
+        printBits(" v: ", v);
+        printBits("vl: ", vl);
+        printBits("vh: ", vh);
+        printBits("vl2: ", vl2);
+        printBits("vh2: ", vh2);
+        printBits("vl3: ", vl3);
+        printBits("vh3: ", vh3);
+        printBits("vh + vl: ", vh + vl);
+        printBits("vh2 + vl2: ", vh2 + vl2);
+        printBits("vh3 + vl3: ", vh3 + vl3);
+        printBits("~vl: ", ~vl);
+    }
+    
+    @Test
+    public void test18(){
+        printBits(-9223372032559808500d);
+        for(int i = 0; i < 20; i++){
+            printBits(-9223372032559808500d - i);
+        }
+        printBits(-12d);
+        printBits(-223372032559808500d - 12d);
+        printBits(Double.longBitsToDouble(
+            0xc3dfffffffc00000L
+//          0b1_100 0011 1101 _1111 1111 1111 1111 1111 1111 1111 1100 00000000000000000000L
+            ));
+        printBits(Double.longBitsToDouble(
+            0xc3dfffffffe00000L
+//          0b1_100 0011 1101 _1111 1111 1111 1111 1111 1111 1111 1110 00000000000000000000L
+            ));
+        printBits(Double.longBitsToDouble(
+            0xc3dfffffffc00001L
+//          0b1_100 0011 1101 _1111 1111 1111 1111 1111 1111 1111 1100 00000000000000000001L
+            ));
+        printBits(-9223372032559808512L);
+        printBits(-4294967296L);
+    }
+    
+    @Test
+    public void test19(){
+        printBits(9223372032559808512L);
+        printBits(9223372032559808512L * 1.0);
+        printBits(0x0088000000000000L);
+        printBits(38280596832649216.0-9223372032559808512.0);
+        printBits(9223372032559808512.0 + 4294967296.0);
+        printBits((long)(9223372032559808512L * 1.0));
+        printBits((9223372032559808512L * 1.0));
+        printBits(0x0000000100000000L);
+        printBits((9223372032559808512L));
+        printBits((9223372032559808512L * 1.0) * 8);
+    }
+    
+    @Test
+    public void test20(){
+        printBits(-9223372032559809000L + -4294967296L);
+        printBits(0x8101010100000000L + 0xffffffff00000000L);
+        printBits(0x8000000000000000L + 0xffffffff00000000L);
+        printBits(808512 + 967296);
+        printBits(9223372032559808512L);
+        printBits(4294967296L);
+        printBits(9223372036854775808.0 * 2);
+        printBits(36854775808.0 * 2);
+    }
+
     private void printBytes(byte... bytes){
         for(byte b : bytes){
             System.out.print(String.format("%x,", b));
@@ -263,8 +357,12 @@ public class LongModelTest extends AppEngineTestCase {
         System.out.println();
     }
     
+    private void printBits(String msg, long v){
+        System.out.print(msg);
+        printBits(v);
+    }
     private void printBits(long bits){
-        System.out.print(bits + ": ");
+        System.out.print(String.format("%20d: ", bits));
         System.out.print(bits < 0 ? 1 : 0);
         for(int i = 0; i < 63; i++){
             System.out.print(((bits << i) & 0x4000000000000000L) != 0 ? 1 : 0);
@@ -278,7 +376,7 @@ public class LongModelTest extends AppEngineTestCase {
     }
 
     private void printBits(double v){
-        System.out.print(v + ": ");
+        System.out.print(String.format("%24.24f: ", v));
         long bits = Double.doubleToRawLongBits(v);
         System.out.print(bits < 0 ? 1 : 0);
         System.out.print(" ");

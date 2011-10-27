@@ -33,6 +33,8 @@ public class TestJsGenerator {
                 w.println("\t\tvar model = " + name + "Meta.readModel(this.responseText);");
                 w.println("\t\tappendTitle(\"" + name + "\");");
                 final String fmt = "\t\tappendResult(\"%s\", %s, model.%1$s);";
+                final String fmtLong = "\t\tappendResult(\"%s\", \"%s\", model.%1$s);";
+                final String fmtLongHex = "\t\tappendResult(\"%s(hex)\", \"0x%016x\", longToHexString(model.%1$s));";
                 writeTestCases(new TestWriter(){
                     public void writePropertyAssert(String propertyName, Object expected) {
                         if(expected instanceof Collection){
@@ -54,6 +56,13 @@ public class TestJsGenerator {
                             w.println(String.format(fmt, propertyName, String.format(
                                 "%1.20g", expected).replaceAll("0+e", "e")
                                         .replaceAll("0+$", "")));
+                        } else if(expected instanceof Long){
+                            long v = (Long)expected;
+                            long h = v & 0xffffffff00000000L;
+                            long l = v & 0x00000000ffffffffL;
+                            w.println(String.format(fmtLong, propertyName, expected));
+                            w.println(String.format(fmtLongHex, propertyName + "_hi32", h));
+                            w.println(String.format(fmtLongHex, propertyName + "_low32", l));
                         } else if(expected instanceof Number){
                             w.println(String.format(fmt, propertyName, expected));
                         } else{
@@ -98,7 +107,7 @@ public class TestJsGenerator {
         
         PrintWriter w = new PrintWriter("www/js/pb" + name + "Meta.js", "UTF-8");
         try{
-            meta.writePbJs(w);
+            meta.writePbModelMetaJs(w);
         } finally{
             w.close();
         }        

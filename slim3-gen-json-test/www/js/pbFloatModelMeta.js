@@ -1,15 +1,15 @@
 var FloatModelMeta = {
 	def: {
-		1: function(cin, v){ v.infinityValue = cin.readFloat();},
-		2: function(cin, v){ v.key = cin.readString();},
-		3: function(cin, v){ v.maxValue = cin.readFloat();},
-		4: function(cin, v){ v.minNormalValue = cin.readFloat();},
-		5: function(cin, v){ v.minP1Value = cin.readFloat();},
-		6: function(cin, v){ v.minValue = cin.readFloat();},
-		7: function(cin, v){ v.nanValue = cin.readFloat();},
-		8: function(cin, v){ v.negativeFloatValue = cin.readFloat();},
-		9: function(cin, v){ v.negativeInfinityValue = cin.readFloat();},
-		10: function(cin, v){ v.positive = cin.readFloat();},
+		1: function(cin, m){ m.infinityValue = cin.readFloat();},
+		2: function(cin, m){ m.key = cin.readString();},
+		3: function(cin, m){ m.maxValue = cin.readFloat();},
+		4: function(cin, m){ m.minNormalValue = cin.readFloat();},
+		5: function(cin, m){ m.minP1Value = cin.readFloat();},
+		6: function(cin, m){ m.minValue = cin.readFloat();},
+		7: function(cin, m){ m.nanValue = cin.readFloat();},
+		8: function(cin, m){ m.negativeFloatValue = cin.readFloat();},
+		9: function(cin, m){ m.negativeInfinityValue = cin.readFloat();},
+		10: function(cin, m){ m.positive = cin.readFloat();},
 	},
 	createEmptyModel: function(){
 		var m = {};

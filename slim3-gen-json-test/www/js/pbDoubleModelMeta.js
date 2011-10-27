@@ -1,15 +1,15 @@
 var DoubleModelMeta = {
 	def: {
-		1: function(cin, v){ v.doubleValue = cin.readDouble();},
-		2: function(cin, v){ v.infinityValue = cin.readDouble();},
-		3: function(cin, v){ v.key = cin.readString();},
-		4: function(cin, v){ v.maxValue = cin.readDouble();},
-		5: function(cin, v){ v.minM2Value = cin.readDouble();},
-		6: function(cin, v){ v.minNormalValue = cin.readDouble();},
-		7: function(cin, v){ v.minValue = cin.readDouble();},
-		8: function(cin, v){ v.nanValue = cin.readDouble();},
-		9: function(cin, v){ v.negativeDoubleValue = cin.readDouble();},
-		10: function(cin, v){ v.negativeInfinityValue = cin.readDouble();},
+		1: function(cin, m){ m.doubleValue = cin.readDouble();},
+		2: function(cin, m){ m.infinityValue = cin.readDouble();},
+		3: function(cin, m){ m.key = cin.readString();},
+		4: function(cin, m){ m.maxValue = cin.readDouble();},
+		5: function(cin, m){ m.minM2Value = cin.readDouble();},
+		6: function(cin, m){ m.minNormalValue = cin.readDouble();},
+		7: function(cin, m){ m.minValue = cin.readDouble();},
+		8: function(cin, m){ m.nanValue = cin.readDouble();},
+		9: function(cin, m){ m.negativeDoubleValue = cin.readDouble();},
+		10: function(cin, m){ m.negativeInfinityValue = cin.readDouble();},
 	},
 	createEmptyModel: function(){
 		var m = {};

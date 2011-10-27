@@ -69,7 +69,7 @@ public class ModelRefModelTest extends AppEngineTestCase {
         ModelRefModelMeta meta = ModelRefModelMeta.get();
         PrintWriter w = new PrintWriter("www/js/pb" + name + "Meta.js", "UTF-8");
         try{
-            meta.writePbJs(w);
+            meta.writePbModelMetaJs(w);
         } finally{
             w.close();
         }        
