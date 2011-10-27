@@ -548,7 +548,7 @@ public abstract class ModelMeta<M> {
         throw new UnsupportedOperationException();
     }
     
-    public void writePbJs(PrintWriter writer)
+    public void writePbModelMetaJs(PrintWriter writer)
     throws IOException{
         throw new UnsupportedOperationException();
     }

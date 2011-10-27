@@ -706,7 +706,7 @@ public class ModelMetaGenerator implements Generator {
      *            the printer
      */
     protected void printWritePbJsMethod(final Printer printer) {
-        new WritePbJsMethodGenerator(printer).generate();
+        new WritePbModelMetaJsMethodGenerator(printer).generate();
     }
 
     /**
@@ -2927,13 +2927,13 @@ public class ModelMetaGenerator implements Generator {
                     fieldNum++;
                     valueExp = "m." + attr.getReadMethodName() + "()";
                     indent = 0;
-                    JsonAnnotation ja = attr.getJson();
-                    if(ja.isIgnore())
-                        continue;
+//                    JsonAnnotation ja = attr.getJson();
+//                    if(ja.isIgnore())
+//                        continue;
                     DataType dataType = attr.getDataType();
-                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-                        continue;
-                    }
+//                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+//                        continue;
+//                    }
                     if (!(dataType instanceof CorePrimitiveType)) {
                         printer.print("if(%s != null", valueExp);
                         if (dataType instanceof TextType) {
@@ -2957,10 +2957,6 @@ public class ModelMetaGenerator implements Generator {
                         printer.printlnWithoutIndent("){");
                         printer.indent();
                         indent++;
-                    }
-                    String name = ja.getAlias();
-                    if (name.length() == 0) {
-                        name = attr.getAttributeName();
                     }
                     dataType.accept(this, attr);
                     for (int i = 0; i < indent; i++) {
@@ -3188,13 +3184,13 @@ public class ModelMetaGenerator implements Generator {
                     if (attr.getReadMethodName() == null)
                         continue;
                     fieldNum++;
-                    JsonAnnotation ja = attr.getJson();
-                    if (ja.isIgnore())
-                        continue;
+//                    JsonAnnotation ja = attr.getJson();
+//                    if (ja.isIgnore())
+//                        continue;
                     DataType dataType = attr.getDataType();
-                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-                        continue;
-                    }
+//                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+//                        continue;
+//                    }
                     
                     valueExp = "m." + attr.getReadMethodName() + "()";
                     dataType.accept(this,  attr);
@@ -3261,35 +3257,35 @@ public class ModelMetaGenerator implements Generator {
     }
 
     /**
-     * The method generator for modelToPb method.
+     * The method generator for writePbJs method.
      * 
      * @author Takao Nakaguchi
      * 
      * @since 1.0.6
      */
-    protected class WritePbJsMethodGenerator extends
+    protected class WritePbModelMetaJsMethodGenerator extends
     SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException> {
         private final Printer printer;
         private String name;
         private int fieldNum;
  
         /**
-         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * Creates a new {@link WritePbModelMetaJsMethodGenerator}.
          * 
          * @param printer
          *            the printer
          */
-        public WritePbJsMethodGenerator(Printer printer) {
+        public WritePbModelMetaJsMethodGenerator(Printer printer) {
             this.printer = printer;
         }
 
         /**
-         * Generates the modelToJson method.
+         * Generates the writePbModelMetaJs method.
          */
         public void generate() {
             printer.println("@Override");
             printer.println(
-                    "public void writePbJs(java.io.PrintWriter writer)");
+                    "public void writePbModelMetaJs(java.io.PrintWriter writer)");
             printer.println("throws java.io.IOException{");
             printer.indent();
             if (modelMetaDesc.isAbstrct()) {
@@ -3311,17 +3307,17 @@ public class ModelMetaGenerator implements Generator {
                 if (attr.getReadMethodName() == null)
                     continue;
                 fieldNum++;
-                JsonAnnotation ja = attr.getJson();
-                if (ja.isIgnore())
-                    continue;
+//                JsonAnnotation ja = attr.getJson();
+//                if (ja.isIgnore())
+//                    continue;
                 DataType dataType = attr.getDataType();
-                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-                    continue;
-                }
-                name = ja.getAlias();
-                if (name.length() == 0) {
+//                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+//                    continue;
+//                }
+//                name = ja.getAlias();
+//                if (name.length() == 0) {
                     name = attr.getAttributeName();
-                }
+//                }
                 dataType.accept(this, attr);
             }
             printer.println("writer.println(\"\\t},\");");
@@ -3331,20 +3327,20 @@ public class ModelMetaGenerator implements Generator {
                     .getAttributeMetaDescList()) {
                 if (attr.getReadMethodName() == null)
                     continue;
-                JsonAnnotation ja = attr.getJson();
-                if (ja.isIgnore())
-                    continue;
-                DataType dataType = attr.getDataType();
-                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-                    continue;
-                }
-                String name = ja.getAlias();
-                if (name.length() == 0) {
+//                JsonAnnotation ja = attr.getJson();
+//                if (ja.isIgnore())
+//                    continue;
+//                DataType dataType = attr.getDataType();
+//                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
+//                    continue;
+//                }
+//                String name = ja.getAlias();
+//                if (name.length() == 0) {
                     name = attr.getAttributeName();
-                }
+//                }
                 printer.println("writer.println(\"\\t\\tm.%s = null;\");", name);
             }
-            printer.println("writer.println(\"\\t\\treturn m;\");", name);
+            printer.println("writer.println(\"\\t\\treturn m;\");");
             printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"\\treadModel: function(input){\");");
             printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(input, this.def, this.createEmptyModel);\");");
@@ -3363,9 +3359,24 @@ public class ModelMetaGenerator implements Generator {
                 throws RuntimeException {
             String m = dataTypeToReadMethod.get(type.getClass());
             if(m != null){
-                printer.println("writer.println(\"\\t\\t%d: function(cin, v){ " +
-                        "v.%s = cin.%s();},\");"
+                printer.println("writer.println(\"\\t\\t%d: function(cin, m){ " +
+                        "m.%s = cin.%s();},\");"
                         , fieldNum, name, m);
+            }
+            return null;
+        }
+        
+        @Override
+        public Void visitPrimitiveLongType(PrimitiveLongType type,
+                AttributeMetaDesc p) throws RuntimeException {
+            String m = dataTypeToReadMethod.get(type.getClass());
+            if(m != null){
+                printer.println("writer.println(\"\\t\\t%d: function(cin, m){\");", fieldNum);
+                printer.println("writer.println(\"\\t\\t\\tvar v = cin.%s();\");", m);
+                printer.println("writer.println(\"\\t\\t\\tm.%s = v.value;\");", name);
+                printer.println("writer.println(\"\\t\\t\\tm.%s_hi32 = v.hi32;\");", name);
+                printer.println("writer.println(\"\\t\\t\\tm.%s_low32 = v.low32;\");", name);
+                printer.println("writer.println(\"\\t\\t},\");");
             }
             return null;
         }
@@ -3375,11 +3386,11 @@ public class ModelMetaGenerator implements Generator {
                 throws RuntimeException {
             String cn = type.getReferenceModelTypeName();
             cn = cn.substring(cn.lastIndexOf('.') + 1);
-            printer.println("writer.println(\"\\t\\t%d: function(cin, v){\");"
+            printer.println("writer.println(\"\\t\\t%d: function(cin, m){\");"
                     , fieldNum);
             printer.println("writer.println(\"\\t\\t\\tvar size = cin.readRawVarint32();\");");
             printer.println("writer.println(\"\\t\\t\\tcin.pushLimit(size);\");");
-            printer.println("writer.println(\"\\t\\t\\tv.%s = %sMeta.readModel(cin);\");"
+            printer.println("writer.println(\"\\t\\t\\tm.%s = %sMeta.readModel(cin);\");"
                 , name, cn.replaceAll("\\.", "_"));
             printer.println("writer.println(\"\\t\\t\\tcin.popLimit();\");");
             printer.println("writer.println(\"\\t\\t},\");");
@@ -3409,30 +3420,6 @@ public class ModelMetaGenerator implements Generator {
         }};
     }
 
-
-    class StringTypeHandler{
-        public void handleModelToPb(AttributeMetaDesc p, Printer printer
-                , int fieldNum, String valueExp){
-            printer.println(
-                p.isCipher() ?
-                    "cos.writeString(%d, encrypt(%s));" :
-                    "cos.writeString(%d, %s);",
-                fieldNum,
-                valueExp);
-        }
-        public void handleComputeSize(AttributeMetaDesc p, Printer printer
-                , int fieldNum, String valueExp){
-            printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
-                    ".CodedOutputStream.computeStringSize(%d, %s);"
-                    , fieldNum, valueExp);
-        }
-        public void handleWritePbJs(AttributeMetaDesc p, Printer printer
-                , int fieldNum, String name){
-            printer.println("writer.println(\"\\t\\t%d: function(cin, v){ " +
-                    "v.%s = cin.readString();},\");"
-                    , fieldNum, name);
-        }
-    }
 
     private boolean isSupportedForJson(DataType dataType) {
         if (jsonSupportedTypes.contains(dataType.getClassName()))

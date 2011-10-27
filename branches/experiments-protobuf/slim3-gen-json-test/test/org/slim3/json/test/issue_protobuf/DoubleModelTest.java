@@ -36,7 +36,7 @@ public class DoubleModelTest extends AppEngineTestCase {
 
         PrintWriter w = new PrintWriter("pbDoubleModelMeta.js", "UTF-8");
         try{
-            DoubleModelMeta.get().writePbJs(w);
+            DoubleModelMeta.get().writePbModelMetaJs(w);
         } finally{
             w.close();
         }

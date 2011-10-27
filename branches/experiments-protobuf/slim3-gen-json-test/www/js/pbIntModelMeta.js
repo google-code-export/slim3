@@ -1,10 +1,10 @@
 var IntModelMeta = {
 	def: {
-		1: function(cin, v){ v.key = cin.readString();},
-		2: function(cin, v){ v.max = cin.readInt32();},
-		3: function(cin, v){ v.min = cin.readInt32();},
-		4: function(cin, v){ v.negative = cin.readInt32();},
-		5: function(cin, v){ v.positive = cin.readInt32();},
+		1: function(cin, m){ m.key = cin.readString();},
+		2: function(cin, m){ m.max = cin.readInt32();},
+		3: function(cin, m){ m.min = cin.readInt32();},
+		4: function(cin, m){ m.negative = cin.readInt32();},
+		5: function(cin, m){ m.positive = cin.readInt32();},
 	},
 	createEmptyModel: function(){
 		var m = {};

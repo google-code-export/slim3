@@ -9,9 +9,38 @@
 
 <script type="text/javascript">
 <!--
-document.write("<p>max: " + Number.MAX_VALUE + "</p>");
-document.write("<p>min: " + Number.MIN_VALUE + "</p>");
-document.write("<p>minm2: " + (Number.MIN_VALUE + Number.MIN_VALUE) + "</p>");
+function w(msg){
+	document.write("<p>" + msg + "</p>");
+}
+w("max: " + Number.MAX_VALUE);
+w("min: " + Number.MIN_VALUE);
+w("minm2: " + (Number.MIN_VALUE + Number.MIN_VALUE));
+w(9223372032559808512);
+str = "";
+v = 9223372032559808512;
+for(i = 0; i < 8; i++){
+	if(i > 0) str = "," + str;
+	str = ((v / Math.pow(2, i * 8)) & 0xff).toString(16) + str;
+}
+w(str);
+w("00".slice(1, 2));
+w((9223372032559808512 * Math.pow(2, -56)).toString(16));
+w((-9223372032559808512 * Math.pow(2, -56)).toString(16));
+w("---");
+w(((-9223372032559808512 * Math.pow(2, -56)) & 0xff));
+w(((-9223372032559808512 * Math.pow(2, -56)) & 0xff).toString(16));
+w(((9223372032559808512 * Math.pow(2, -56)) & 0xff).toString(16));
+w((((9223372032559808512 * Math.pow(2, -56)) & 0xff) * -1).toString(16));
+w("---");
+w(((-1 / Math.pow(2, 28)) & 0xff).toString(16) + ":" + (-1 & 0xffffff).toString(16));
+w(-1 / 2);
+w("---");
+w("9223372036854775807");
+w(9223372036854775807);
+w((9223372036854775807 - 9000000000000000000) * 10);
+w((9223372036854775807 - 9200000000000000000) * 100);
+w((9223372036854775807 - 9220000000000000000) * 1000);
+w((9223372036854775807 - 9223000000000000000) * 10000);
 /*
 document.write(
 		"<p>" + ((0xff << 24) + (0xff * Math.pow(2, 32))).toString(16) + "</p>"
