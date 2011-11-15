@@ -15,10 +15,12 @@ var IntModelMeta = {
 		m.positive = null;
 		return m;
 	},
-	readModel: function(input){
-		return pbCommon.readModel(input, this.def, this.createEmptyModel);
+	readModel: function(input, maxDepth, curDepth){
+		if(typeof(maxDepth) == "undefined") maxDepth = 1;
+		return pbCommon.readModel(input, this.def, this.createEmptyModel, maxDepth, curDepth);
 	},
-	readModels: function(input){
-		return pbCommon.readModels(input, this.def, this.createEmptyModel);
+	readModels: function(input, maxDepth, curDepth){
+		if(typeof(maxDepth) == "undefined") maxDepth = 1;
+		return pbCommon.readModels(input, this.def, this.createEmptyModel, maxDepth, curDepth);
 	},
 };
