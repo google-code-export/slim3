@@ -497,24 +497,49 @@ public abstract class ModelMeta<M> {
         return meta.jsonToModel(reader.read(), maxDepth, currentDepth);
     }
 
+    /**
+     * Converts the JSON string to model.
+     * 
+     * @param model
+     *            the model
+     *            
+     * @param os
+     *            the stream to output pb data
+     *
+     * @throws IOException
+     */
     public void modelToPb(Object model, OutputStream os)
     throws IOException{
         modelToPb(model, os, 0);
     }
 
+    /**
+     * Converts the JSON string to model.
+     * 
+     * @param model
+     *            the model
+     *            
+     * @param os
+     *            the stream to output pb data
+     *            
+     * @param maxDepth
+     *            the max depth of expanding ModelRef
+     *
+     * @throws IOException
+     */
     public void modelToPb(Object model, OutputStream os, int maxDepth)
     throws IOException{
         CodedOutputStream cos = CodedOutputStream.newInstance(os);
         try{
-            modelToPb(cos, model, maxDepth, 0);
+            modelToPb(model, cos, maxDepth, 0);
         } finally{
             cos.flush();
         }
     }
 
     public void modelToPb(
-            CodedOutputStream cos
-            , java.lang.Object model, int maxDepth, int currentDepth)
+            Object model, CodedOutputStream cos
+            , int maxDepth, int currentDepth)
     throws IOException{
         throw new UnsupportedOperationException();
     }
@@ -530,25 +555,34 @@ public abstract class ModelMeta<M> {
     throws java.io.IOException{
         CodedOutputStream cos = CodedOutputStream.newInstance(os);
         for(Object m : models){
-            cos.writeRawVarint32(computeModelSizePb(m));
-            modelToPb(cos, m, maxDepth, currentDepth);
+            cos.writeRawVarint32(computeModelSizePb(m, maxDepth, currentDepth));
+            modelToPb(m, cos, maxDepth, currentDepth);
         }
         cos.flush();
+    }
+
+    protected Key invokeGetKey(ModelMeta<?> meta, Object model){
+        return meta.getKey(model);
     }
 
     protected void invokeModelToPb(ModelMeta<?> meta, CodedOutputStream cos
             , int fieldNum, Object model, int maxDepth, int currentDepth)
     throws IOException{
         cos.writeTag(fieldNum, WireFormat.WIRETYPE_LENGTH_DELIMITED);
-        cos.writeRawVarint32(meta.computeModelSizePb(model));
-        meta.modelToPb(cos, model, maxDepth, currentDepth);
+        cos.writeRawVarint32(meta.computeModelSizePb(model, maxDepth, currentDepth));
+        meta.modelToPb(model, cos, maxDepth, currentDepth);
     }
 
-    public int computeModelSizePb(Object model){
+    public int computeModelSizePb(Object model, int maxDepth, int currentDepth){
         throw new UnsupportedOperationException();
     }
     
     public void writePbModelMetaJs(PrintWriter writer)
+    throws IOException{
+        writePbModelMetaJs(writer, 0);
+    }
+    
+    public void writePbModelMetaJs(PrintWriter writer, int maxDepth)
     throws IOException{
         throw new UnsupportedOperationException();
     }

@@ -7,9 +7,14 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 
 import org.slim3.datastore.Datastore;
+import org.slim3.datastore.InverseModelListRef;
 import org.slim3.datastore.ModelMeta;
+import org.slim3.datastore.ModelRef;
+
+import com.google.appengine.api.datastore.Key;
 
 public class TestJsGenerator {
     public interface TestWriter{
@@ -22,6 +27,7 @@ public class TestJsGenerator {
     }
 
     public void generate(Object model) throws IOException{
+        int maxDepth = 1;
         String name = model.getClass().getSimpleName();
         ModelMeta<?> meta = Datastore.getModelMeta(model.getClass());
         {
@@ -33,8 +39,11 @@ public class TestJsGenerator {
                 w.println("\t\tvar model = " + name + "Meta.readModel(this.responseText);");
                 w.println("\t\tappendTitle(\"" + name + "\");");
                 final String fmt = "\t\tappendResult(\"%s\", %s, model.%1$s);";
+                final String fmtString = "\t\tappendResult(\"%s\", \"%s\", model.%1$s);";
                 final String fmtLong = "\t\tappendResult(\"%s\", \"%s\", model.%1$s);";
                 final String fmtLongHex = "\t\tappendResult(\"%s(hex)\", \"0x%016x\", longToHexString(model.%1$s));";
+                final String fmtModelRef = "\t\tappendNestedResult(\"%s\", %s, model.%1$s);";
+                final String fmtInverseModelListRef = "\t\tappendModelArrayResult(\"%s\", %s, model.%1$s);";
                 writeTestCases(new TestWriter(){
                     public void writePropertyAssert(String propertyName, Object expected) {
                         if(expected instanceof Collection){
@@ -65,8 +74,27 @@ public class TestJsGenerator {
                             w.println(String.format(fmtLongHex, propertyName + "_low32", l));
                         } else if(expected instanceof Number){
                             w.println(String.format(fmt, propertyName, expected));
+                        } else if(expected instanceof Key){
+                            w.println(String.format(fmtString, propertyName
+                                , Datastore.keyToString((Key)expected)));
+                        } else if(expected instanceof ModelRef<?>){
+                            ModelRef<?> mr = (ModelRef<?>)expected;
+                            Object m = mr.getModel();
+                            if(m != null){
+                                w.println(String.format(fmtModelRef
+                                    , propertyName
+                                    , Datastore.getModelMeta(m.getClass()).modelToJson(m, 1)
+                                    ));
+                            }
+                        } else if(expected instanceof InverseModelListRef<?, ?>){
+                            InverseModelListRef<?, ?> mr = (InverseModelListRef<?, ?>)expected;
+                            List<?> list = mr.getModelList();
+                            w.println(String.format(fmtInverseModelListRef
+                                , propertyName
+                                , Datastore.getModelMeta(mr.getModelClass()).modelsToJson(list.toArray(), 0)
+                                ));
                         } else{
-                            w.println(String.format(fmt, propertyName, "\"" + expected + "\""));
+                            w.println(String.format(fmtString, propertyName, expected));
                         }
                     }
                     @Override
@@ -100,14 +128,14 @@ public class TestJsGenerator {
     
         OutputStream os = new FileOutputStream("www/data/" + name + ".bin");
         try{
-            meta.modelToPb(model, os);
+            meta.modelToPb(model, os, maxDepth);
         } finally{
             os.close();
         }
         
         PrintWriter w = new PrintWriter("www/js/pb" + name + "Meta.js", "UTF-8");
         try{
-            meta.writePbModelMetaJs(w);
+            meta.writePbModelMetaJs(w, maxDepth);
         } finally{
             w.close();
         }        

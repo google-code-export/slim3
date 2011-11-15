@@ -86,6 +86,7 @@ import org.slim3.gen.datastore.DoubleType;
 import org.slim3.gen.datastore.EnumType;
 import org.slim3.gen.datastore.FloatType;
 import org.slim3.gen.datastore.IntegerType;
+import org.slim3.gen.datastore.InverseModelListRefType;
 import org.slim3.gen.datastore.InverseModelRefType;
 import org.slim3.gen.datastore.KeyType;
 import org.slim3.gen.datastore.LinkedHashSetType;
@@ -2906,8 +2907,8 @@ public class ModelMetaGenerator implements Generator {
             printer.println("@Override");
             printer
                 .println(
-                    "public void modelToPb(com.google.appengine.repackaged.com.google.protobuf" +
-                    ".CodedOutputStream cos, %s model, int maxDepth, int currentDepth)",
+                    "public void modelToPb(%s model, com.google.appengine.repackaged.com.google.protobuf" +
+                    ".CodedOutputStream cos, int maxDepth, int currentDepth)",
                     Object);
             printer.println("throws java.io.IOException{");
             printer.indent();
@@ -2949,10 +2950,10 @@ public class ModelMetaGenerator implements Generator {
                             printer.printWithoutIndent(
                                 " && %s.getKey() != null",
                                 valueExp);
-                       } else if (dataType instanceof InverseModelRefType) {
+                       } else if (dataType instanceof InverseModelListRefType) {
                             printer.printWithoutIndent(
-                                " && getKey(m) != null"
-                                );
+                                " && %s.getModelList().size() > 0",
+                                valueExp);
                         }
                         printer.printlnWithoutIndent("){");
                         printer.indent();
@@ -3093,32 +3094,54 @@ public class ModelMetaGenerator implements Generator {
             printer.println("if(currentDepth == maxDepth){");
             printer.indent();
             printer.println("cos.writeString(%d, %s.keyToString(%s.getKey()));"
-                , fieldNum, "org.slim3.datastore.Datastore", valueExp);
-            printer.println("return;");
+                , fieldNum, "org.slim3.datastore.Datastore"
+                , valueExp);
             printer.unindent();
-            printer.println("}");
+            printer.println("} else{");
+            printer.indent();
             printer.println("Object rm = %s.getModel();"
                 , valueExp);
             printer.println("%s<?> meta = %s.getModelMeta(rm.getClass());"
                 , ModelMeta, "org.slim3.datastore.Datastore");
             printer.println("cos.writeTag(%d, com.google.appengine.repackaged.com.google.protobuf.WireFormat.WIRETYPE_LENGTH_DELIMITED);"
                 , fieldNum);
-            printer.println("cos.writeRawVarint32(meta.computeModelSizePb(rm));");
-            printer.println("meta.modelToPb(cos, rm, maxDepth, currentDepth);");
+            printer.println("cos.writeRawVarint32(meta.computeModelSizePb(rm, maxDepth, currentDepth + 1));");
+            printer.println("meta.modelToPb(rm, cos, maxDepth, currentDepth + 1);");
+            printer.unindent();
+            printer.println("}");
             return null;
         }
 
-/*        
         @Override
-        public Void visitInverseModelRefType(InverseModelRefType type, AttributeMetaDesc p)
+        public Void visitInverseModelListRefType(InverseModelListRefType type, AttributeMetaDesc p)
                 throws RuntimeException {
-            printer.println(
-                "%s.encode(writer, %s, maxDepth, currentDepth);",
-                coderExp,
-                valueExp);
+            printer.println("%s<?> meta = %s.getModelMeta();", ModelMeta, valueExp);
+            printer.println("if(currentDepth == maxDepth){");
+            printer.indent();
+            printer.println("for(%s o : %s.getModelList()){",
+                type.getReferenceModelClassName(), valueExp);
+            printer.indent();
+            printer.println("cos.writeString(%d, %s.keyToString(invokeGetKey(meta, o)));"
+                , fieldNum, "org.slim3.datastore.Datastore");
+            printer.unindent();
+            printer.println("}");
+            printer.unindent();
+            printer.println("} else{");
+            printer.indent();
+            printer.println("for(Object o : %s.getModelList()){"
+                , valueExp);
+            printer.indent();
+            printer.println("cos.writeTag(%d, com.google.appengine.repackaged.com.google.protobuf.WireFormat.WIRETYPE_LENGTH_DELIMITED);"
+                , fieldNum);
+            printer.println("cos.writeRawVarint32(meta.computeModelSizePb(o, maxDepth, currentDepth + 1));");
+            printer.println("meta.modelToPb(o, cos, maxDepth, currentDepth + 1);");
+            printer.unindent();
+            printer.println("}");
+            printer.unindent();
+            printer.println("}");
             return null;
         }
-*/
+
         @SuppressWarnings("serial")
         private Map<Class<? extends DataType>, String> simpleWriters
         = new HashMap<Class<? extends DataType>, String>(){{
@@ -3146,6 +3169,10 @@ public class ModelMetaGenerator implements Generator {
      */
     protected class ComputeModelSizePbMethodGenerator extends
     SimpleDataTypeVisitor<Void, AttributeMetaDesc, RuntimeException> {
+        private static final String CodedOutputStream =
+                "com.google.appengine.repackaged.com.google.protobuf.CodedOutputStream";
+        private static final String KeyFactory =
+                "com.google.appengine.api.datastore.KeyFactory";
         private final Printer printer;
         private int fieldNum;
         private String valueExp;
@@ -3166,7 +3193,7 @@ public class ModelMetaGenerator implements Generator {
         public void generate() {
             printer.println("@Override");
             printer.println(
-                    "public int computeModelSizePb(Object model){");
+                    "public int computeModelSizePb(Object model, int maxDepth, int curDepth){");
             printer.indent();
             printer.println(
                 "%s m = (%1$s) model;",
@@ -3211,9 +3238,8 @@ public class ModelMetaGenerator implements Generator {
                     printer.println("if(%s != null){", valueExp);
                     printer.indent();
                 }
-                printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
-                        ".CodedOutputStream.%s(%d, %s);"
-                        , m, fieldNum, valueExp);
+                printer.println("size += %s.%s(%d, %s);",
+                        CodedOutputStream, m, fieldNum, valueExp);
                 if(!(type instanceof CorePrimitiveType)){
                     printer.unindent();
                     printer.println("}");
@@ -3227,10 +3253,62 @@ public class ModelMetaGenerator implements Generator {
                 throws RuntimeException {
             printer.println("if(%s != null){", valueExp);
             printer.indent();
-            printer.println("size += com.google.appengine.repackaged.com.google.protobuf" +
-                    ".CodedOutputStream.computeStringSize(%d, %s);"
-                    , fieldNum, "com.google.appengine.api.datastore.KeyFactory.keyToString(" +
-                    valueExp + ")");
+            printer.println("size += %s.computeStringSize(%d, %s.keyToString(%s));",
+                    CodedOutputStream, fieldNum,
+                    KeyFactory, valueExp);
+            printer.unindent();
+            printer.println("}");
+            return null;
+        }
+        
+        @Override
+        public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            printer.println("if(%s.getModel() != null){", valueExp);
+            printer.indent();
+            printer.println("if(curDepth == maxDepth){");
+            printer.indent();
+            printer.println("size += %s.computeStringSize(%d, %s.keyToString(%s.getKey()));",
+                    CodedOutputStream, fieldNum, KeyFactory, valueExp);
+            printer.unindent();
+            printer.println("} else{");
+            printer.indent();
+            printer.println("size += %s.computeTagSize(%d);",
+                    CodedOutputStream, fieldNum);
+            printer.println("size += %s.getModelMeta().computeModelSizePb(%1$s.getModel(), maxDepth, curDepth + 1);",
+                    valueExp);
+            printer.unindent();
+            printer.println("}");
+            printer.unindent();
+            printer.println("}");
+            return null;
+        }
+        
+        @Override
+        public Void visitInverseModelListRefType(InverseModelListRefType type,
+                AttributeMetaDesc p) throws RuntimeException {
+            String meta = p.getAttributeName() + "Meta";
+            printer.println("%s<?> %s = %s.getModelMeta();",
+                    ModelMeta, meta, valueExp);
+            printer.println("if(curDepth == maxDepth){");
+            printer.indent();
+            printer.println("for(Object o : %s.getModelList()){", valueExp);
+            printer.indent();
+            printer.println("size += %s.computeStringSize(%d, %s.keyToString(invokeGetKey(%s, o)));",
+                    CodedOutputStream, fieldNum, KeyFactory, meta);
+            printer.unindent();
+            printer.println("}");
+            printer.unindent();
+            printer.println("} else{");
+            printer.indent();
+            printer.println("for(Object o : %s.getModelList()){", valueExp);
+            printer.indent();
+            printer.println("size += %s.computeTagSize(%d);",
+                    CodedOutputStream, fieldNum);
+            printer.println("size += %s.computeModelSizePb(o, maxDepth, curDepth + 1);",
+                    meta);
+            printer.unindent();
+            printer.println("}");
             printer.unindent();
             printer.println("}");
             return null;
@@ -3285,7 +3363,7 @@ public class ModelMetaGenerator implements Generator {
         public void generate() {
             printer.println("@Override");
             printer.println(
-                    "public void writePbModelMetaJs(java.io.PrintWriter writer)");
+                    "public void writePbModelMetaJs(java.io.PrintWriter writer, int maxDepth)");
             printer.println("throws java.io.IOException{");
             printer.indent();
             if (modelMetaDesc.isAbstrct()) {
@@ -3342,11 +3420,13 @@ public class ModelMetaGenerator implements Generator {
             }
             printer.println("writer.println(\"\\t\\treturn m;\");");
             printer.println("writer.println(\"\\t},\");");
-            printer.println("writer.println(\"\\treadModel: function(input){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(input, this.def, this.createEmptyModel);\");");
+            printer.println("writer.println(\"\\treadModel: function(input, maxDepth, curDepth){\");");
+            printer.println("writer.println(\"\\t\\tif(typeof(maxDepth) == \\\"undefined\\\") maxDepth = \" + maxDepth + \";\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModel(input, this.def, this.createEmptyModel, maxDepth, curDepth);\");");
             printer.println("writer.println(\"\\t},\");");
-            printer.println("writer.println(\"\\treadModels: function(input){\");");
-            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(input, this.def, this.createEmptyModel);\");");
+            printer.println("writer.println(\"\\treadModels: function(input, maxDepth, curDepth){\");");
+            printer.println("writer.println(\"\\t\\tif(typeof(maxDepth) == \\\"undefined\\\") maxDepth = \" + maxDepth + \";\");");
+            printer.println("writer.println(\"\\t\\treturn pbCommon.readModels(input, this.def, this.createEmptyModel, maxDepth, curDepth);\");");
             printer.println("writer.println(\"\\t},\");");
             printer.println("writer.println(\"};\");");
             printer.unindent();
@@ -3386,13 +3466,40 @@ public class ModelMetaGenerator implements Generator {
                 throws RuntimeException {
             String cn = type.getReferenceModelTypeName();
             cn = cn.substring(cn.lastIndexOf('.') + 1);
-            printer.println("writer.println(\"\\t\\t%d: function(cin, m){\");"
+            printer.println("writer.println(\"\\t\\t%d: function(cin, m, maxDepth, curDepth){\");",
+                    fieldNum);
+            printer.println("writer.println(\"\\t\\t\\tif(curDepth == maxDepth){\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tm.%s = cin.readString();\");",
+                    name);
+            printer.println("writer.println(\"\\t\\t\\t} else{\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tvar size = cin.readRawVarint32();\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tcin.pushLimit(size);\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tm.%s = %sMeta.readModel(cin, maxDepth, curDepth + 1);\");",
+                    name, cn.replaceAll("\\.", "_"));
+            printer.println("writer.println(\"\\t\\t\\t\\tcin.popLimit();\");");
+            printer.println("writer.println(\"\\t\\t\\t}\");");
+            printer.println("writer.println(\"\\t\\t},\");");
+            return null;
+        }
+        
+        @Override
+        public Void visitInverseModelListRefType(InverseModelListRefType type,
+                AttributeMetaDesc p) throws RuntimeException {
+            String cn = type.getReferenceModelTypeName();
+            cn = cn.substring(cn.lastIndexOf('.') + 1);
+            printer.println("writer.println(\"\\t\\t%d: function(cin, m, maxDepth, curDepth){\");"
                     , fieldNum);
-            printer.println("writer.println(\"\\t\\t\\tvar size = cin.readRawVarint32();\");");
-            printer.println("writer.println(\"\\t\\t\\tcin.pushLimit(size);\");");
-            printer.println("writer.println(\"\\t\\t\\tm.%s = %sMeta.readModel(cin);\");"
-                , name, cn.replaceAll("\\.", "_"));
-            printer.println("writer.println(\"\\t\\t\\tcin.popLimit();\");");
+            printer.println("writer.println(\"\\t\\t\\tif(m.%s == null) m.%1$s = new Array();\");",
+                    name);
+            printer.println("writer.println(\"\\t\\t\\tif(curDepth == maxDepth){\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tm.%s.push(cin.readString());\");", name);
+            printer.println("writer.println(\"\\t\\t\\t} else{\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tvar size = cin.readRawVarint32();\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tcin.pushLimit(size);\");");
+            printer.println("writer.println(\"\\t\\t\\t\\tm.%s.push(%sMeta.readModel(cin, maxDepth, curDepth + 1));\");",
+                    name, cn.replaceAll("\\.", "_"));
+            printer.println("writer.println(\"\\t\\t\\t\\tcin.popLimit();\");");
+            printer.println("writer.println(\"\\t\\t\\t}\");");
             printer.println("writer.println(\"\\t\\t},\");");
             return null;
         }

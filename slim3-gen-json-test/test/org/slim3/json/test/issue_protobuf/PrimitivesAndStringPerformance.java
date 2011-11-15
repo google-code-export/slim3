@@ -65,7 +65,7 @@ public class PrimitivesAndStringPerformance {
                 for(int j = 0; j < 100; j++){
                     CodedOutputStream cos = CodedOutputStream.newInstance(new NullOutputStream());
                     long s = System.currentTimeMillis();
-                    meta.modelToPb(cos, models[j], 1, 0);
+                    meta.modelToPb(models[j], cos, 1, 0);
                     d += System.currentTimeMillis() - s;
                 }
             }
@@ -83,25 +83,6 @@ public class PrimitivesAndStringPerformance {
             }
             System.out.println("jsontime" + n + ": " + d);
         }
-    }
-    
-    private static void writePb(PrimitivesAndStringModelMeta meta, PrimitivesAndStringModel m)
-    throws IOException{
-        CodedOutputStream cos = CodedOutputStream.newInstance(new ByteArrayOutputStream());
-/*
-        cos.writeBool(1, m.isBooleanValue());
-        cos.writeDouble(2, m.getDoubleValue());
-        cos.writeFloat(3, m.getFloatValue());
-        cos.writeInt32(4, m.getIntValue());
-        if(m.getKey() != null){
-            cos.writeString(5, com.google.appengine.api.datastore.KeyFactory.keyToString(m.getKey()));
-        }
-        cos.writeInt64(6, m.getLongValue());
-        cos.writeInt32(7, m.getShortValue());
-        if(m.getStringValue() != null){
-            cos.writeString(8, m.getStringValue());
-        }
-*/
     }
     
     public static void size() throws Exception{

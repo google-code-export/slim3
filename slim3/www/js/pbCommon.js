@@ -29,29 +29,31 @@ var pbCommon = {
 	CodedInputStream: function(is){
 		this.is = is;
 	},
-	doReadModel: function(cin, def, factory){
+	doReadModel: function(cin, def, factory, maxDepth, curDepth){
+		if(typeof(maxDepth) == "undefined") maxDepth = 0;
+		if(typeof(curDepth) == "undefined") curDepth = 0;
 		var m = factory();
 		while(true){
 			var n = cin.readFieldNum();
 			if(n == null) break;
 			var d = def[n];
-			if(d != null) def[n](cin, m);
+			if(d != null) def[n](cin, m, maxDepth, curDepth);
 		}
 		return m;
 	},
-	readModel: function(text, def, factory){
+	readModel: function(text, def, factory, maxDepth, curDepth){
 		var cin = text;
 		if(typeof(text) == "string"){
 			cin = new this.CodedInputStream(new this.TextInputStream(text));
 		}
-		return this.doReadModel(cin, def, factory);
+		return this.doReadModel(cin, def, factory, maxDepth, curDepth);
 	},
-	readModels: function(text, def, factory){
+	readModels: function(text, def, factory, maxDepth, curDepth){
 		var cin = new this.CodedInputStream(new this.TextInputStream(text));
 		var models = [];
 		while((size = cin.readRawVarint32()) != null){
 			cin.pushLimit(size);
-			var m = this.doReadModel(cin, def, factory);
+			var m = this.doReadModel(cin, def, factory, maxDepth, curDepth);
 			cin.popLimit();
 			if(m != null){
 				models.push(m);
