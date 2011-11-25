@@ -49,11 +49,11 @@ public class DatastoreTest extends AppEngineTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
         CipherFactory.getFactory().clearGlobalKey();
         System.setProperty(Datastore.DELEGATE_KEY, DatastoreDelegate.class
             .getName());
         Datastore.initialize();
+        super.tearDown();
     }
 
     /**
@@ -118,14 +118,6 @@ public class DatastoreTest extends AppEngineTestCase {
         assertThat(Datastore.getCurrentTransaction(), is(nullValue()));
         ds.beginTransaction();
         assertThat(Datastore.getCurrentTransaction(), is(notNullValue()));
-    }
-
-    /**
-     * @throws Exception
-     */
-    @Test
-    public void beginGlobalTransaction() throws Exception {
-        assertThat(Datastore.beginGlobalTransaction(), is(notNullValue()));
     }
 
     /**

@@ -32,10 +32,11 @@ public class InverseModelListRefModel {
     @Attribute(primaryKey=true)
     private Key key;
     private int intValue;
-    @Attribute(json=@Json(coder=Expanded.class))
+    @Json(coder=Expanded.class)
     private ModelRef<InverseModelListRefModel> parent
         = new ModelRef<InverseModelListRefModel>(InverseModelListRefModel.class);
-    @Attribute(persistent=false, json=@Json(coder=Expanded.class))
+    @Attribute(persistent=false)
+    @Json(coder=Expanded.class)
     private InverseModelListRef<InverseModelListRefModel, InverseModelListRefModel> children
         = new InverseModelListRef<InverseModelListRefModel, InverseModelListRefModel>(
                 InverseModelListRefModel.class, "parent", this);

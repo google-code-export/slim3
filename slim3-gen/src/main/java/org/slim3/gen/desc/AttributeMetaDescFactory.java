@@ -548,12 +548,13 @@ public class AttributeMetaDescFactory {
     protected void handleJson(AttributeMetaDesc attributeMetaDesc,
             ClassDeclaration classDeclaration,
             FieldDeclaration fieldDeclaration, AnnotationMirror attribute) {
-        AnnotationMirror json =
-            AnnotationMirrorUtil.getElementValue(
-                attribute,
-                AnnotationConstants.json);
         JsonAnnotation anno = new JsonAnnotation();
         attributeMetaDesc.setJson(anno);
+        AnnotationMirror json =
+                DeclarationUtil.getAnnotationMirror(
+                    env,
+                    fieldDeclaration,
+                    AnnotationConstants.Json);
         if(json == null){
             return;
         }

@@ -38,6 +38,6 @@ public class LobAttrModel {
     @Attribute(primaryKey = true)
     private Key key;
     private byte[] bytes;
-    @Attribute(json=@Json(ignoreNull=false))
+    @Json(ignoreNull=false)
     private Blob blob;
 }

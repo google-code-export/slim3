@@ -28,7 +28,7 @@ public class ModelRefModel {
     @Attribute(primaryKey=true)
     private Key key;
     private int intValue;
-    @Attribute(json=@Json(coder=Expanded.class))
+    @Json(coder=Expanded.class)
     private ModelRef<ModelRefModel> modelRefValue
         = new ModelRef<ModelRefModel>(ModelRefModel.class);
 }
