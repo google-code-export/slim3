@@ -342,6 +342,22 @@ public class AppEngineTester implements Delegate<Environment> {
     }
 
     /**
+     * the setting for LocalServerEnvironement.
+     * <p>
+     * simulate latency when datastore operations are executed if {@code true}
+     * </p>
+     */
+    public static boolean SIMULATE_PRODUCTION_LATENCIES = false;
+
+    /**
+     * the setting for LocalServerEnvironement.
+     * <p>
+     * enable api deadline when rpc are executed if {@code true}
+     * </p>
+     */
+    public static boolean ENFORCE_API_DEADLINES = false;
+
+    /**
      * Prepares local services.
      * 
      * @param loader
@@ -367,6 +383,12 @@ public class AppEngineTester implements Delegate<Environment> {
                     }
                     if (method.getName().equals("getPort")) {
                         return 0;
+                    }
+                    if (method.getName().equals("simulateProductionLatencies")) {
+                        return SIMULATE_PRODUCTION_LATENCIES;
+                    }
+                    if (method.getName().equals("enforceApiDeadlines")) {
+                        return ENFORCE_API_DEADLINES;
                     }
                     Class<?> clazz = method.getReturnType();
                     if (clazz.isPrimitive()) {
@@ -428,7 +450,8 @@ public class AppEngineTester implements Delegate<Environment> {
             parentDelegate = originalDelegate;
             environment = new TestEnvironment(originalEnvironment);
         } else {
-            parentDelegate = apiProxyLocalImpl;
+            parentDelegate =
+                originalDelegate != null ? originalDelegate : apiProxyLocalImpl;
             environment = new TestEnvironment();
         }
         ApiProxy.setDelegate(this);
