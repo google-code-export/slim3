@@ -112,6 +112,7 @@ import org.slim3.gen.datastore.TextType;
 import org.slim3.gen.desc.AttributeMetaDesc;
 import org.slim3.gen.desc.JsonAnnotation;
 import org.slim3.gen.desc.ModelMetaDesc;
+import org.slim3.gen.desc.PbAnnotation;
 import org.slim3.gen.printer.Printer;
 
 /**
@@ -2928,13 +2929,13 @@ public class ModelMetaGenerator implements Generator {
                     fieldNum++;
                     valueExp = "m." + attr.getReadMethodName() + "()";
                     indent = 0;
-//                    JsonAnnotation ja = attr.getJson();
-//                    if(ja.isIgnore())
-//                        continue;
+                    PbAnnotation pa = attr.getPb();
+                    if(pa.isIgnore())
+                        continue;
                     DataType dataType = attr.getDataType();
-//                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-//                        continue;
-//                    }
+                    if(dataType instanceof InverseModelRefType && !pa.hasIgnore()){
+                        continue;
+                    }
                     if (!(dataType instanceof CorePrimitiveType)) {
                         printer.print("if(%s != null", valueExp);
                         if (dataType instanceof TextType) {
@@ -3211,13 +3212,13 @@ public class ModelMetaGenerator implements Generator {
                     if (attr.getReadMethodName() == null)
                         continue;
                     fieldNum++;
-//                    JsonAnnotation ja = attr.getJson();
-//                    if (ja.isIgnore())
-//                        continue;
+                    PbAnnotation pa = attr.getPb();
+                    if (pa.isIgnore())
+                        continue;
                     DataType dataType = attr.getDataType();
-//                    if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-//                        continue;
-//                    }
+                    if(dataType instanceof InverseModelRefType && !pa.hasIgnore()){
+                        continue;
+                    }
                     
                     valueExp = "m." + attr.getReadMethodName() + "()";
                     dataType.accept(this,  attr);
@@ -3385,17 +3386,17 @@ public class ModelMetaGenerator implements Generator {
                 if (attr.getReadMethodName() == null)
                     continue;
                 fieldNum++;
-//                JsonAnnotation ja = attr.getJson();
-//                if (ja.isIgnore())
-//                    continue;
+                PbAnnotation pa = attr.getPb();
+                if (pa.isIgnore())
+                    continue;
                 DataType dataType = attr.getDataType();
-//                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-//                    continue;
-//                }
-//                name = ja.getAlias();
-//                if (name.length() == 0) {
+                if(dataType instanceof InverseModelRefType && !pa.hasIgnore()){
+                    continue;
+                }
+                name = pa.getAlias();
+                if (name.length() == 0) {
                     name = attr.getAttributeName();
-//                }
+                }
                 dataType.accept(this, attr);
             }
             printer.println("writer.println(\"\\t},\");");
@@ -3405,17 +3406,17 @@ public class ModelMetaGenerator implements Generator {
                     .getAttributeMetaDescList()) {
                 if (attr.getReadMethodName() == null)
                     continue;
-//                JsonAnnotation ja = attr.getJson();
-//                if (ja.isIgnore())
-//                    continue;
-//                DataType dataType = attr.getDataType();
-//                if(dataType instanceof InverseModelRefType && !ja.hasIgnore()){
-//                    continue;
-//                }
-//                String name = ja.getAlias();
-//                if (name.length() == 0) {
+                PbAnnotation pa = attr.getPb();
+                if (pa.isIgnore())
+                    continue;
+                DataType dataType = attr.getDataType();
+                if(dataType instanceof InverseModelRefType && !pa.hasIgnore()){
+                    continue;
+                }
+                String name = pa.getAlias();
+                if (name.length() == 0) {
                     name = attr.getAttributeName();
-//                }
+                }
                 printer.println("writer.println(\"\\t\\tm.%s = null;\");", name);
             }
             printer.println("writer.println(\"\\t\\treturn m;\");");

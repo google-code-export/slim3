@@ -17,6 +17,7 @@ public class GenerateJsTests {
             gen.generate(new DoubleModel());
             gen.generate(newModelRefModel());
             gen.generate(newInverseModelListRefModel());
+            gen.generate(new AnnotatedStringModel());
         } finally{
             tester.tearDown();
         }

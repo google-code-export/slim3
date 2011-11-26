@@ -15,12 +15,12 @@ public class LobAttrsModelTest {
     public void modelToJson() throws Exception {
         LobAttrModel m = new LobAttrModel();
         m.setBytes("hello".getBytes());
-        Assert.assertEquals("{\"bytes\":\"aGVsbG8=\"}", meta.modelToJson(m));
+        Assert.assertEquals("{\"blob\":null,\"bytes\":\"aGVsbG8=\"}", meta.modelToJson(m));
     }
 
     @Test
     public void modelToJson_null() throws Exception {
-        Assert.assertEquals("{}", meta.modelToJson(new LobAttrModel()));
+        Assert.assertEquals("{\"blob\":null}", meta.modelToJson(new LobAttrModel()));
     }
 
     private LobAttrModelMeta meta = LobAttrModelMeta.get();

@@ -205,6 +205,11 @@ public class AttributeMetaDescFactory {
             classDeclaration,
             fieldDeclaration,
             attribute);
+        handlePb(
+            attributeMetaDesc,
+            classDeclaration,
+            fieldDeclaration,
+            attribute);
         handleAttributeListener(
             attributeMetaDesc,
             classDeclaration,
@@ -534,7 +539,7 @@ public class AttributeMetaDescFactory {
     }
 
     /**
-     * Handles the json.
+     * Handles the @Json.
      * 
      * @param attributeMetaDesc
      *            the attribute meta description
@@ -577,6 +582,46 @@ public class AttributeMetaDescFactory {
                 anno.setCoderClassName(getClassNameOfClassParameter(
                     entry.getKey(), entry.getValue()
                     ));
+            }
+        }
+    }
+
+    /**
+     * Handles the @Pb.
+     * 
+     * @param attributeMetaDesc
+     *            the attribute meta description
+     * @param classDeclaration
+     *            the model class declaration
+     * @param fieldDeclaration
+     *            the field declaration
+     * @param attribute
+     *            the annotation mirror for Attribute
+     */
+    protected void handlePb(AttributeMetaDesc attributeMetaDesc,
+            ClassDeclaration classDeclaration,
+            FieldDeclaration fieldDeclaration, AnnotationMirror attribute) {
+        PbAnnotation anno = new PbAnnotation();
+        attributeMetaDesc.setPb(anno);
+        AnnotationMirror pb =
+                DeclarationUtil.getAnnotationMirror(
+                    env,
+                    fieldDeclaration,
+                    AnnotationConstants.Pb);
+        if(pb == null){
+            return;
+        }
+        for(Map.Entry<AnnotationTypeElementDeclaration, AnnotationValue> entry
+                : pb.getElementValues().entrySet()){
+            String sn = entry.getKey().getSimpleName();
+            if(sn.equals(AnnotationConstants.ignore)) {
+                anno.setIgnore(entry.getValue() != null ?
+                    (Boolean)entry.getValue().getValue()
+                    : false);
+            } else if(sn.equals(AnnotationConstants.alias)){
+                anno.setAlias(entry.getValue() != null ?
+                    (String)entry.getValue().getValue()
+                    : "");
             }
         }
     }

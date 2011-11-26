@@ -6,6 +6,7 @@ import org.slim3.datastore.Model;
 import org.slim3.datastore.ModelRef;
 import org.slim3.datastore.json.Expanded;
 import org.slim3.datastore.json.Json;
+import org.slim3.datastore.pb.Pb;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -36,7 +37,8 @@ public class InverseModelListRefModel {
     private ModelRef<InverseModelListRefModel> parent
         = new ModelRef<InverseModelListRefModel>(InverseModelListRefModel.class);
     @Attribute(persistent=false)
-    @Json(coder=Expanded.class)
+    @Json(ignore=false, coder=Expanded.class)
+    @Pb(ignore=false)
     private InverseModelListRef<InverseModelListRefModel, InverseModelListRefModel> children
         = new InverseModelListRef<InverseModelListRefModel, InverseModelListRefModel>(
                 InverseModelListRefModel.class, "parent", this);

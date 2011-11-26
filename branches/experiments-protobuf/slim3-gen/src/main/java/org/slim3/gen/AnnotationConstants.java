@@ -87,6 +87,9 @@ public final class AnnotationConstants {
     /** the name of coder element of @Json */
     public static final String coder = "coder";
     
+    /** {@code org.slim3.datastore.pb.Pb} */
+    public static final String Pb = "org.slim3.datastore.pb.Pb";
+
     /** {@code org.junit.Test} */
     public static final String Test = "org.junit.Test";
 }
