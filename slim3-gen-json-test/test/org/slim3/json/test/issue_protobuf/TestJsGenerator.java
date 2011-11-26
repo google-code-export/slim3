@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import org.slim3.datastore.Datastore;
 import org.slim3.datastore.InverseModelListRef;
 import org.slim3.datastore.ModelMeta;
 import org.slim3.datastore.ModelRef;
+import org.slim3.datastore.pb.Pb;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -106,6 +108,18 @@ public class TestJsGenerator {
                                     && m.getParameterTypes().length == 0){
                                 String propName = name.substring(3, 4).toLowerCase()
                                         + name.substring(4);
+                                try{
+                                    Field f = model.getClass().getDeclaredField(propName);
+                                    Pb pb = f.getAnnotation(Pb.class);
+                                    if(pb != null){
+                                        if(pb.ignore()) continue;
+                                        if(pb.alias().length() > 0){
+                                            propName = pb.alias();
+                                        }
+                                    }
+                                } catch (SecurityException e) {
+                                } catch (NoSuchFieldException e) {
+                                }
                                 try {
                                     Object v = m.invoke(model);
                                     if(v != null){

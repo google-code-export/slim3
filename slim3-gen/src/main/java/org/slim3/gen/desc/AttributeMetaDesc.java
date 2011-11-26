@@ -58,6 +58,9 @@ public class AttributeMetaDesc {
     /** the json */
     protected JsonAnnotation json;
 
+    /** the pb */
+    protected PbAnnotation pb;
+
     /** the readMethodName */
     protected String readMethodName;
 
@@ -200,6 +203,20 @@ public class AttributeMetaDesc {
      */
     public void setJson(JsonAnnotation json) {
         this.json = json;
+    }
+
+    /**
+     * @return the pb
+     */
+    public PbAnnotation getPb() {
+        return pb;
+    }
+
+    /**
+     * @param pb the pb to set
+     */
+    public void setPb(PbAnnotation pb) {
+        this.pb = pb;
     }
 
     /**

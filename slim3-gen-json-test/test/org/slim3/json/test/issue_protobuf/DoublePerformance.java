@@ -1,11 +1,6 @@
 package org.slim3.json.test.issue_protobuf;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-
-import sun.nio.cs.StreamEncoder;
 
 public class DoublePerformance {
     public static void main(String[] args) throws Exception{
