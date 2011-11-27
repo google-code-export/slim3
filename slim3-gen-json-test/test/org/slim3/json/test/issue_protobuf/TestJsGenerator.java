@@ -139,14 +139,14 @@ public class TestJsGenerator {
                 w.close();
             }
         }
-    
+
         OutputStream os = new FileOutputStream("www/data/" + name + ".bin");
         try{
             meta.modelToPb(model, os, maxDepth);
         } finally{
             os.close();
         }
-        
+
         PrintWriter w = new PrintWriter("www/js/pb" + name + "Meta.js", "UTF-8");
         try{
             meta.writePbModelMetaJs(w, maxDepth);

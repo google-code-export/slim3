@@ -59,11 +59,11 @@ public class WrappersModel {
     }
     @Attribute(primaryKey=true)
     private Key key;
-    private Boolean booleanValue;
+    private Boolean booleanValue = true;
 //    private Character characterValue;
-    private Short shortValue;
-    private Integer integerValue;
-    private Long longValue;
-    private Float floatValue;
-    private Double doubleValue;
+    private Short shortValue = 1;
+    private Integer integerValue = 10;
+    private Long longValue = 100L;
+    private Float floatValue = 1.1f;
+    private Double doubleValue = 11.1;
 }
