@@ -39,6 +39,10 @@ function appendNestedResult(name, expected, actual){
 	document.getElementById("results").innerHTML += buff;
 }
 
+function appendCollectionResult(name, expected, actual){
+//	makeResult(name, expected, actual);
+}
+
 function appendModelArrayResult(name, expected, actual){
 	var buff = "";
 	for(i = 0; i < expected.length; i++){

@@ -3175,8 +3175,8 @@ public class ModelMetaGenerator implements Generator {
         private static final String KeyFactory =
                 "com.google.appengine.api.datastore.KeyFactory";
         private final Printer printer;
-        private int fieldNum;
         private String valueExp;
+        private int fieldNum;
  
         /**
          * Creates a new {@link ModelToJsonMethodGenerator}.
@@ -3186,6 +3186,23 @@ public class ModelMetaGenerator implements Generator {
          */
         public ComputeModelSizePbMethodGenerator(Printer printer) {
             this.printer = printer;
+        }
+        
+        /**
+         * Creates a new {@link ModelToJsonMethodGenerator}.
+         * 
+         * @param printer
+         *            the printer
+         * @param valueExp
+         *            the valueExp
+         * @param fieldNum
+         *            the fieldNum
+         */
+        public ComputeModelSizePbMethodGenerator(Printer printer,
+                String valueExp, int fieldNum) {
+            this.printer = printer;
+            this.valueExp = valueExp;
+            this.fieldNum = fieldNum;
         }
 
         /**
@@ -3261,7 +3278,31 @@ public class ModelMetaGenerator implements Generator {
             printer.println("}");
             return null;
         }
-        
+
+        @Override
+        public Void visitCollectionType(CollectionType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            DataType et = type.getElementType();
+            if (!isSupportedForJson(et)) {
+                printer.println("// %s is not supported.", et.getClassName());
+                return null;
+            }
+            printer.println("if(%s != null){", valueExp);
+            printer.indent();
+            printer.println("for(%s v : %s){",
+                et.getClassName(), valueExp);
+            printer.indent();
+            ComputeModelSizePbMethodGenerator gen =
+                new ComputeModelSizePbMethodGenerator(printer,
+                    "v", fieldNum);
+            et.accept(gen, p);
+            printer.unindent();
+            printer.println("}");
+            printer.unindent();
+            printer.println("}");
+            return null;
+        }
+
         @Override
         public Void visitModelRefType(ModelRefType type, AttributeMetaDesc p)
                 throws RuntimeException {
@@ -3459,6 +3500,25 @@ public class ModelMetaGenerator implements Generator {
                 printer.println("writer.println(\"\\t\\t\\tm.%s_low32 = v.low32;\");", name);
                 printer.println("writer.println(\"\\t\\t},\");");
             }
+            return null;
+        }
+        
+        @Override
+        public Void visitCollectionType(CollectionType type, AttributeMetaDesc p)
+                throws RuntimeException {
+            DataType et = type.getElementType();
+            if (!isSupportedForJson(et)) {
+                printer.println("// %s is not supported.", et.getClassName());
+                return null;
+            }
+            printer.println("writer.println(\"\\t\\t%d: function(cin, m, maxDepth, curDepth){\");"
+                    , fieldNum);
+            printer.println("writer.println(\"\\t\\t\\tif(m.%s == null) m.%1$s = new Array();\");",
+                    name);
+            String m = dataTypeToReadMethod.get(et.getClass());
+            printer.println("writer.println(\"\\t\\t\\tm.%s.push(cin.%s());\");",
+                name, m);
+            printer.println("writer.println(\"\\t\\t},\");");
             return null;
         }
         
